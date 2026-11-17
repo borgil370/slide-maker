@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>模块 2.2 · 认识终端 · 零到全栈</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    @font-face {
+      font-family: 'LXGW WenKai';
+      src: url('assets/fonts/LXGWWenKai-Light.ttf') format('truetype');
+      font-weight: 300; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'LXGW WenKai';
+      src: url('assets/fonts/LXGWWenKai-Regular.ttf') format('truetype');
+      font-weight: 400; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'LXGW WenKai';
+      src: url('assets/fonts/LXGWWenKai-Medium.ttf') format('truetype');
+      font-weight: 500; font-style: normal; font-display: swap;
+    }
+
+    :root {
+      --bg:              #F6F4F1;
+      --surface:         #FFFFFF;
+      --surface-2:       #EFEBE6;
+      --text:            #1C1E1D;
+      --text-secondary:  #586460;
+      --text-dim:        #9AA8A4;
+      --border:          #DDD8D2;
+      --border-subtle:   #EAE6E1;
+      --accent:          #2A9182;
+      --accent-light:    #4DB8A8;
+      --accent-muted:    #E6F4F2;
+
+      --glow-primary:       rgba(42, 145, 130, 0.08);
+      --glow-secondary:     rgba(42, 145, 130, 0.05);
+      --glow-quote:         rgba(42, 145, 130, 0.06);
+      --highlight-glow:     rgba(42, 145, 130, 0.15);
+      --edit-outline-color: rgba(42, 145, 130, 0.35);
+
+      --font-zh:   'LXGW WenKai', 'Songti SC', Georgia, serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+      --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration:  0.65s;
+
+      --title-size:    clamp(2.2rem, 5.5vw, 4.2rem);
+      --h2-size:       clamp(1.75rem, 3.4vw, 2.5rem);
+      --h3-size:       clamp(1.2rem, 2.3vw, 1.7rem);
+      --body-size:     clamp(1.05rem, 1.6vw, 1.25rem);
+      --small-size:    clamp(0.9rem, 1.15vw, 1.05rem);
+      --slide-padding: clamp(1.5rem, 5vw, 5rem);
+      --content-gap:   clamp(0.75rem, 2.5vw, 2.5rem);
+      --element-gap:   clamp(0.3rem, 1vw, 0.9rem);
+    }
+
+
+    /* ============================================================
+       DARK MODE OVERRIDES — applied via html.dark class (JS toggle)
+       ============================================================ */
+    html.dark {
+      --bg:              #131614;
+      --surface:         #1E2320;
+      --surface-2:       #252B27;
+      --text:            #EDECEA;
+      --text-secondary:  #9DA89F;
+      --text-dim:        #6B756D;
+      --border:          #2A302C;
+      --border-subtle:   #1E2420;
+      --accent:          #4DB8A8;
+      --accent-light:    #68CABB;
+      --accent-muted:    #1A2E2C;
+
+      --glow-primary:       rgba(77, 184, 168, 0.13);
+      --glow-secondary:     rgba(77, 184, 168, 0.07);
+      --glow-quote:         rgba(77, 184, 168, 0.08);
+      --highlight-glow:     rgba(77, 184, 168, 0.2);
+      --edit-outline-color: rgba(77, 184, 168, 0.35);
+    }
+
+    html, body { height: 100%; overflow-x: hidden; }
+    html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
+    .slide {
+      width: 100vw; height: 100vh; height: 100dvh;
+      overflow: hidden; scroll-snap-align: start;
+      display: flex; flex-direction: column; position: relative;
+    }
+    .slide-content {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; max-height: 100%;
+      overflow: hidden; padding: var(--slide-padding);
+    }
+    img, .image-container { max-width: 100%; max-height: min(50vh, 400px); object-fit: contain; }
+
+    @media (max-height: 700px) {
+      :root {
+        --slide-padding: clamp(0.9rem, 3vw, 2rem);
+        --content-gap:   clamp(0.5rem, 1.5vw, 1rem);
+        --title-size:    clamp(1.8rem, 4.5vw, 2.8rem);
+        --h2-size:       clamp(1.4rem, 3vw, 1.9rem);
+      }
+    }
+    @media (max-height: 600px) {
+      :root {
+        --slide-padding: clamp(0.75rem, 2.5vw, 1.5rem);
+        --content-gap:   clamp(0.4rem, 1.2vw, 0.8rem);
+        --title-size:    clamp(1.6rem, 4vw, 2.4rem);
+        --h2-size:       clamp(1.3rem, 3vw, 1.7rem);
+        --body-size:     clamp(0.95rem, 1.3vw, 1.1rem);
+        --small-size:    clamp(0.85rem, 1.1vw, 1rem);
+      }
+      .nav-dots { display: none; }
+    }
+    @media (max-height: 500px) {
+      :root {
+        --slide-padding: clamp(0.6rem, 2vw, 1rem);
+        --title-size:    clamp(1.4rem, 3.5vw, 1.8rem);
+        --h2-size:       clamp(1.2rem, 2.5vw, 1.5rem);
+        --body-size:     clamp(0.9rem, 1.2vw, 1.05rem);
+        --small-size:    clamp(0.8rem, 1vw, 0.95rem);
+      }
+    }
+    @media (max-width: 600px) {
+      :root { --title-size: clamp(1.25rem, 7vw, 2.5rem); }
+      .two-col   { grid-template-columns: 1fr !important; }
+      .three-col { grid-template-columns: 1fr !important; }
+      .cmd-grid  { grid-template-columns: 1fr !important; }
+      .check-grid { grid-template-columns: 1fr !important; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+      html { scroll-behavior: auto; }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-zh); }
+    ul { list-style: none; }
+
+    h1 { font-size: var(--title-size); font-weight: 300; line-height: 1.25; color: var(--text); }
+    h2 { font-size: var(--h2-size);    font-weight: 400; line-height: 1.3;  color: var(--text); }
+
+    /* Reveal animations */
+    .reveal {
+      opacity: 0; transform: translateY(22px);
+      transition: opacity var(--duration) var(--ease-expo), transform var(--duration) var(--ease-expo);
+      transition-delay: var(--delay, 0s);
+    }
+    .slide.visible .reveal { opacity: 1; transform: translateY(0); }
+    .reveal-blur {
+      opacity: 0; filter: blur(8px);
+      transition: opacity 0.8s var(--ease-expo), filter 0.8s var(--ease-expo);
+      transition-delay: var(--delay, 0s);
+    }
+    .slide.visible .reveal-blur { opacity: 1; filter: blur(0); }
+
+    /* Progress bar + nav dots */
+    .progress-bar {
+      position: fixed; top: 0; left: 0; height: 2px;
+      background: var(--accent); z-index: 1000;
+      width: 0%; transition: width 0.35s ease; pointer-events: none;
+    }
+    .nav-dots {
+      position: fixed; right: clamp(10px, 1.8vw, 20px); top: 50%;
+      transform: translateY(-50%); z-index: 1000;
+      display: flex; flex-direction: column; gap: 7px;
+    }
+    .nav-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--text-dim); cursor: pointer; border: none; padding: 0;
+      transition: background 0.25s, transform 0.25s;
+    }
+    .nav-dot.active { background: var(--accent); transform: scale(1.7); }
+
+    /* Shared components */
+    .accent-line {
+      width: clamp(36px, 5vw, 64px); height: 3px;
+      background: var(--accent); border-radius: 2px;
+      margin-bottom: var(--content-gap); flex-shrink: 0;
+    }
+    .slide-label {
+      font-family: var(--font-mono); font-size: var(--small-size);
+      color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase;
+      margin-bottom: var(--element-gap); flex-shrink: 0;
+    }
+    .module-tag {
+      display: inline-flex; align-items: center;
+      background: var(--accent-muted); border: 1px solid var(--accent);
+      color: var(--accent); padding: 3px 10px; border-radius: 4px;
+      font-family: var(--font-mono); font-size: var(--small-size);
+      letter-spacing: 0.08em; margin-bottom: clamp(1rem, 2.5vh, 1.75rem);
+      flex-shrink: 0; width: fit-content;
+    }
+    .quote-text {
+      font-size: clamp(1.3rem, 3.8vw, 3rem);
+      font-weight: 300; line-height: 1.5; color: var(--text);
+    }
+    .quote-text em { font-style: normal; color: var(--accent); font-weight: 400; }
+    .caption { font-size: var(--small-size); color: var(--text-secondary); line-height: 1.6; }
+    .caption.dim { color: var(--text-dim); }
+
+    /* Two-col */
+    .two-col {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: clamp(0.75rem, 2.5vw, 2.5rem); align-items: stretch;
+    }
+    .split-panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: clamp(0.9rem, 2vw, 1.6rem);
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .split-panel.accent-panel { border-color: var(--accent); background: var(--accent-muted); }
+    .split-label { font-family: var(--font-mono); font-size: var(--small-size); color: var(--text-dim); }
+    .split-label.teal { color: var(--accent); }
+    .split-title { font-size: var(--h3-size); color: var(--text); line-height: 1.3; }
+    .split-body  { font-size: var(--small-size); color: var(--text-secondary); line-height: 1.6; }
+    .split-items { display: flex; flex-direction: column; gap: 0; }
+    .split-items li {
+      font-size: var(--small-size); color: var(--text-secondary); line-height: 1.5;
+      padding: 5px 0; border-bottom: 1px solid var(--border-subtle);
+    }
+    .split-items li:last-child { border-bottom: none; }
+
+    /* Three-col */
+    .three-col {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: clamp(0.6rem, 1.8vw, 1.4rem);
+    }
+    .col-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: clamp(0.9rem, 2vw, 1.5rem);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .col-card-num   { font-family: var(--font-mono); font-size: var(--small-size); color: var(--accent); }
+    .col-card-title { font-size: var(--h3-size); color: var(--text); }
+    .col-card-desc  { font-size: var(--small-size); color: var(--text-secondary); line-height: 1.6; }
+
+    /* Doubt list */
+    .doubt-list { display: flex; flex-direction: column; gap: clamp(0.4rem, 1.2vh, 0.9rem); }
+    .doubt-card {
+      background: var(--surface); border-left: 2px solid var(--border);
+      border-radius: 0 6px 6px 0; padding: clamp(0.7rem, 1.8vw, 1.1rem);
+      font-size: var(--body-size); color: var(--text-secondary); line-height: 1.5;
+    }
+
+    /* Dash list */
+    .dash-list { display: flex; flex-direction: column; gap: var(--element-gap); }
+    .dash-list li {
+      display: flex; align-items: flex-start; gap: 12px;
+      font-size: var(--body-size); color: var(--text-secondary); line-height: 1.65;
+    }
+    .dash-list li::before {
+      content: '—'; color: var(--accent); flex-shrink: 0;
+      margin-top: 1px; font-family: var(--font-mono);
+    }
+
+    /* Inline code token */
+    .token {
+      font-family: var(--font-mono); font-size: 0.9em;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 3px; padding: 1px 6px; color: var(--accent-light);
+    }
+
+    /* Code block */
+    .code-block {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: clamp(0.8rem, 1.8vw, 1.4rem);
+      font-family: var(--font-mono); font-size: var(--small-size);
+      color: var(--text-secondary); line-height: 1.9;
+      white-space: pre; overflow-x: auto; flex-shrink: 0;
+    }
+    .code-block .cmd   { color: var(--accent-light); }
+    .code-block .cmt   { color: var(--text-dim); }
+    .code-block .path  { color: var(--accent); }
+
+    /* Command reference grid */
+    .cmd-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: clamp(0.3rem, 0.8vw, 0.6rem);
+    }
+    .cmd-row {
+      display: flex; align-items: baseline; gap: 10px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: clamp(0.5rem, 1.2vw, 0.85rem) clamp(0.7rem, 1.4vw, 1.1rem);
+    }
+    .cmd-name {
+      font-family: var(--font-mono); font-size: var(--small-size);
+      color: var(--accent-light); white-space: nowrap; flex-shrink: 0;
+      min-width: clamp(3rem, 5vw, 5rem);
+    }
+    .cmd-desc {
+      font-size: var(--small-size); color: var(--text-secondary); line-height: 1.4;
+    }
+
+    /* Vim key cards */
+    .vim-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: clamp(0.6rem, 1.5vw, 1.2rem);
+    }
+    .vim-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: clamp(0.8rem, 2vw, 1.4rem);
+      display: flex; flex-direction: column; gap: 8px; align-items: center;
+      text-align: center;
+    }
+    .vim-key {
+      font-family: var(--font-mono); font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+      color: var(--accent); background: var(--accent-muted);
+      border: 1px solid var(--accent); border-radius: 5px;
+      padding: 4px 12px; display: inline-block;
+    }
+    .vim-action { font-size: var(--small-size); color: var(--text); font-weight: 500; }
+    .vim-desc   { font-size: var(--small-size); color: var(--text-secondary); line-height: 1.5; }
+
+    /* Practice flow */
+    .flow-row {
+      display: flex; align-items: stretch; gap: clamp(0.4rem, 1vw, 0.8rem);
+      flex-wrap: nowrap; overflow-x: auto;
+    }
+    .flow-step {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: clamp(0.6rem, 1.4vw, 1rem) clamp(0.8rem, 1.8vw, 1.3rem);
+      display: flex; flex-direction: column; gap: 4px;
+      flex: 1; min-width: 0; text-align: center;
+    }
+    .flow-step-num  { font-family: var(--font-mono); font-size: var(--small-size); color: var(--accent); }
+    .flow-step-cmd  { font-family: var(--font-mono); font-size: var(--small-size); color: var(--accent-light); }
+    .flow-step-desc { font-size: var(--small-size); color: var(--text-secondary); line-height: 1.4; }
+    .flow-arrow {
+      color: var(--text-dim); font-size: clamp(1rem, 1.5vw, 1.3rem);
+      flex-shrink: 0; font-family: var(--font-mono);
+      display: flex; align-items: center;
+    }
+
+    /* Check grid */
+    .check-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: clamp(0.5rem, 1.4vw, 1rem);
+    }
+    .check-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: clamp(0.75rem, 1.6vw, 1.2rem);
+      display: flex; gap: clamp(0.5rem, 1vw, 0.8rem); align-items: flex-start;
+    }
+    .check-icon {
+      width: clamp(16px, 1.8vw, 22px); height: clamp(16px, 1.8vw, 22px);
+      flex-shrink: 0; margin-top: 2px;
+      border: 1.5px solid var(--border); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .check-card.done .check-icon {
+      background: var(--accent-muted); border-color: var(--accent);
+    }
+    .check-card.done .check-icon::after {
+      content: '✓'; font-size: 0.72em; color: var(--accent); font-family: var(--font-mono);
+    }
+    .check-text { font-size: var(--small-size); color: var(--text-secondary); line-height: 1.6; }
+
+    /* Card highlighting */
+    .two-col, .three-col, .doubt-list, .cmd-grid, .vim-grid, .check-grid, .flow-row {
+      cursor: default;
+    }
+    .split-panel, .col-card, .doubt-card, .cmd-row, .vim-card, .check-card, .flow-step {
+      cursor: pointer;
+      transition: opacity 0.3s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .two-col.has-selection      .split-panel:not(.card-highlighted),
+    .three-col.has-selection    .col-card:not(.card-highlighted),
+    .doubt-list.has-selection   .doubt-card:not(.card-highlighted),
+    .cmd-grid.has-selection     .cmd-row:not(.card-highlighted),
+    .vim-grid.has-selection     .vim-card:not(.card-highlighted),
+    .check-grid.has-selection   .check-card:not(.card-highlighted),
+    .flow-row.has-selection     .flow-step:not(.card-highlighted) {
+      opacity: 0.25; transform: scale(0.97);
+    }
+    .split-panel.card-highlighted, .col-card.card-highlighted,
+    .doubt-card.card-highlighted, .cmd-row.card-highlighted,
+    .vim-card.card-highlighted, .check-card.card-highlighted {
+      box-shadow: 0 0 0 2px var(--accent), 0 4px 20px rgba(77,184,168,0.2);
+      transform: translateY(-2px) scale(1.01);
+    }
+    .flow-step.card-highlighted {
+      border-color: var(--accent);
+      background: var(--accent-muted);
+    }
+
+    /* Brand */
+    .brand-icon-closing {
+      height: clamp(4rem, 9vh, 7rem); width: auto;
+      display: block; margin-bottom: var(--content-gap);
+      opacity: 0.9; flex-shrink: 0;
+    }
+    .brand-line {
+      display: flex; align-items: center; gap: 14px;
+      font-family: var(--font-mono); font-size: var(--small-size);
+      color: var(--text-dim); margin-top: clamp(1.5rem, 3.5vh, 2.5rem);
+    }
+    .brand-line::before {
+      content: ''; display: block; width: 28px; height: 1px;
+      background: var(--text-dim); flex-shrink: 0;
+    }
+    .title-slide::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse at 75% 15%, rgba(77,184,168,0.13) 0%, transparent 55%),
+        radial-gradient(ellipse at 15% 85%, rgba(77,184,168,0.07) 0%, transparent 45%);
+    }
+    .quote-slide::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse at 50% 45%, rgba(77,184,168,0.08) 0%, transparent 60%);
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      position: fixed; bottom: 18px; right: 22px; z-index: 10002;
+      width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text-secondary);
+      font-size: 16px; cursor: pointer; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.25s, color 0.25s, background 0.25s;
+    }
+    .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Inline edit */
+    .edit-hotzone {
+      position: fixed; top: 0; left: 0; width: 80px; height: 80px;
+      z-index: 10000; cursor: pointer;
+    }
+    .edit-toggle {
+      position: fixed; top: 14px; left: 14px; z-index: 10001;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text-dim); padding: 5px 10px; border-radius: 5px;
+      font-family: var(--font-mono); font-size: 11px; cursor: pointer;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+      letter-spacing: 0.05em;
+    }
+    .edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+    .edit-toggle.active { background: var(--accent-muted); border-color: var(--accent); color: var(--accent); }
+    .edit-banner {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
+      background: var(--accent-muted); border-top: 1px solid var(--accent);
+      color: var(--accent); font-family: var(--font-mono); font-size: 11px;
+      padding: 7px 16px; display: flex; justify-content: space-between;
+      align-items: center; opacity: 0; pointer-events: none;
+      transition: opacity 0.25s; letter-spacing: 0.04em;
+    }
+    .edit-banner.active { opacity: 1; pointer-events: auto; }
+    body.edit-active [data-edit] {
+      outline: 1px dashed rgba(77,184,168,0.35); border-radius: 2px; cursor: text;
+    }
+    body.edit-active [data-edit]:focus {
+      outline: 1px solid var(--accent); background: rgba(77,184,168,0.05);
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<nav class="nav-dots" id="navDots" aria-label="幻灯片导航"></nav>
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle">✏ EDIT</button>
+<div class="edit-banner" id="editBanner">
+  <span>编辑模式 · 点击文字即可修改 · Ctrl+S 导出</span>
+  <span style="opacity:0.6">再次按 E 或点击左上角退出</span>
+</div>
+
+
+<!-- Theme toggle -->
+<button class="theme-toggle" id="themeToggle" title="切换深浅色模式">☾</button>
+
+<!-- ============================================================
+     SLIDE 1 · 标题
+     ============================================================ -->
+<section class="slide title-slide" id="slide-1">
+  <div class="slide-content">
+
+    <div class="module-tag reveal" style="--delay: 0.05s;">模块 2.2</div>
+
+    <h1 class="reveal" style="--delay: 0.25s;" data-edit>
+      认识终端
+    </h1>
+
+    <p class="reveal" style="--delay: 0.35s; font-size: var(--h3-size); color: var(--text-secondary); font-weight: 300; margin-top: 0.5rem;" data-edit>
+      命令行、生存级 Vim 与 Linux 直觉
+    </p>
+
+    <div class="brand-line reveal" style="--delay: 0.48s;" data-edit>
+      零到全栈 · 李勃老师 · 2026
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 2 · 终端是什么
+     ============================================================ -->
+<section class="slide" id="slide-2">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">WHAT IS TERMINAL</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>另一种和电脑打交道的方式</h2>
+
+    <div class="two-col" style="margin-top: var(--content-gap);">
+      <div class="split-panel reveal" style="--delay: 0.28s;">
+        <div class="split-label">图形界面（你熟悉的）</div>
+        <div class="split-title" data-edit>鼠标点来点去</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>用文件夹图标看文件</li>
+          <li data-edit>用编辑器软件打开项目</li>
+          <li data-edit>双击、拖动、右键菜单</li>
+        </ul>
+      </div>
+      <div class="split-panel accent-panel reveal" style="--delay: 0.38s;">
+        <div class="split-label teal">终端（命令行 / CLI）</div>
+        <div class="split-title" data-edit>直接告诉电脑你要做什么</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>进入某个文件夹</li>
+          <li data-edit>创建文件、运行程序</li>
+          <li data-edit>连接远程服务器</li>
+          <li data-edit>一行命令完成多个操作</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="caption reveal" style="--delay: 0.52s; margin-top: var(--content-gap);" data-edit>
+      终端、命令行、CLI、Terminal——入门阶段先把它们当作同一类东西。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 3 · 为什么开发要用终端
+     ============================================================ -->
+<section class="slide" id="slide-3">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">WHY TERMINAL</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>为什么开发要用终端</h2>
+
+    <div class="two-col" style="margin-top: var(--content-gap);">
+
+      <div class="split-panel reveal" style="--delay: 0.28s;">
+        <div class="split-label">一行命令完成多个步骤</div>
+        <div class="split-title" data-edit>比图形界面快得多</div>
+        <div class="code-block" style="margin-top: 10px; font-size: var(--small-size);" data-edit><span class="cmt"># 创建嵌套文件夹 + 新建文件，一行搞定</span>
+<span class="cmd">mkdir -p ~/Projects/zero2tech</span>
+<span class="cmd">touch ~/Projects/zero2tech/index.html</span></div>
+        <p class="split-body" style="margin-top: 10px;" data-edit>图形界面当然也能完成——但更慢、更绕、更难描述。</p>
+      </div>
+
+      <div class="split-panel reveal" style="--delay: 0.38s;">
+        <div class="split-label">更重要的原因</div>
+        <div class="split-title" data-edit>有些事只能在终端做</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>操作远程服务器——没有桌面，只有命令行</li>
+          <li data-edit>AI 时代：把命令和报错贴给大模型，它更容易理解你的处境</li>
+          <li data-edit>开发工具链（Git、npm、pip 等）几乎都在终端里运行</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <p class="caption reveal" style="--delay: 0.52s; margin-top: var(--content-gap);" data-edit>
+      终端不是高手专属工具，而是后面整条开发路径里最基础的一种工作方式。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 4 · 终端里的文件与路径
+     ============================================================ -->
+<section class="slide" id="slide-4">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">FILES &amp; PATHS IN TERMINAL</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>上一节的概念，在终端里换了说法</h2>
+
+    <div class="two-col" style="margin-top: var(--content-gap);">
+
+      <div class="split-panel reveal" style="--delay: 0.28s;">
+        <div class="split-label">图形界面的说法</div>
+        <ul class="split-items" style="margin-top: 10px;">
+          <li data-edit>文件夹</li>
+          <li data-edit>打开一个位置</li>
+          <li data-edit>看看文件夹里有什么</li>
+          <li data-edit>路径</li>
+        </ul>
+      </div>
+
+      <div class="split-panel accent-panel reveal" style="--delay: 0.38s;">
+        <div class="split-label teal">终端里的说法</div>
+        <ul class="split-items" style="margin-top: 10px;">
+          <li data-edit>目录（directory）</li>
+          <li data-edit>进入某个目录（<span class="token">cd</span>）</li>
+          <li data-edit>列出当前目录里的文件（<span class="token">ls</span>）</li>
+          <li data-edit>路径（一样，没变）</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <p class="caption reveal" style="--delay: 0.52s; margin-top: var(--content-gap);" data-edit>
+      文件、路径的概念没有变，只是操作方式不同，有些叫法上存在差异。在终端里迷路时，先问自己：<strong style="color: var(--text)">我现在在哪个路径下？</strong>
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 5 · 命令速查
+     ============================================================ -->
+<section class="slide" id="slide-5">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">COMMANDS</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>常用命令</h2>
+
+    <div class="cmd-grid" style="margin-top: var(--content-gap);">
+      <div class="cmd-row reveal" style="--delay: 0.22s;">
+        <span class="cmd-name">pwd</span>
+        <span class="cmd-desc" data-edit>查看当前所在路径</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.26s;">
+        <span class="cmd-name">ls</span>
+        <span class="cmd-desc" data-edit>查看当前目录里有什么</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.30s;">
+        <span class="cmd-name">cd</span>
+        <span class="cmd-desc" data-edit>进入某个目录</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.34s;">
+        <span class="cmd-name">mkdir</span>
+        <span class="cmd-desc" data-edit>创建目录</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.38s;">
+        <span class="cmd-name">touch</span>
+        <span class="cmd-desc" data-edit>创建文件</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.42s;">
+        <span class="cmd-name">cat</span>
+        <span class="cmd-desc" data-edit>查看文本文件内容</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.46s;">
+        <span class="cmd-name">rm</span>
+        <span class="cmd-desc" data-edit>删除文件（谨慎使用）</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.50s;">
+        <span class="cmd-name">rmdir</span>
+        <span class="cmd-desc" data-edit>删除空目录</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.54s;">
+        <span class="cmd-name">clear</span>
+        <span class="cmd-desc" data-edit>清空终端画面</span>
+      </div>
+    </div>
+
+    <p class="caption dim reveal" style="--delay: 0.62s; margin-top: var(--content-gap);">
+      路径符号：<span class="token">~</span> 家目录 &nbsp;·&nbsp; <span class="token">/</span> 根目录 &nbsp;·&nbsp; <span class="token">..</span> 上一级 &nbsp;·&nbsp; <span class="token">./</span> 当前目录
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 6 · 实战练习闭环
+     ============================================================ -->
+<section class="slide" id="slide-6">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">HANDS-ON</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>一套操作走一遍</h2>
+
+    <div class="flow-row reveal" style="--delay: 0.28s; margin-top: var(--content-gap);">
+      <div class="flow-step">
+        <div class="flow-step-num">01</div>
+        <div class="flow-step-desc" data-edit>确认当前位置</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-num">02</div>
+        <div class="flow-step-desc" data-edit>创建练习目录</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-num">03</div>
+        <div class="flow-step-desc" data-edit>进入目录</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-num">04</div>
+        <div class="flow-step-desc" data-edit>创建文件</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-num">05</div>
+        <div class="flow-step-desc" data-edit>编辑文件</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-num">06</div>
+        <div class="flow-step-desc" data-edit>查看内容</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-num">07</div>
+        <div class="flow-step-desc" data-edit>清理删除</div>
+      </div>
+    </div>
+
+    <p class="caption reveal" style="--delay: 0.42s; margin-top: var(--content-gap);" data-edit>
+      建议真的在终端里跟着做一遍。这条闭环做完，终端最核心的操作感你就建立起来了。
+    </p>
+
+    <p class="caption dim reveal" style="--delay: 0.50s; margin-top: var(--element-gap);" data-edit>
+      小技巧：输入命令时按 Tab 键，终端会尝试自动补全路径或文件名。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 7 · Vim 生存技
+     ============================================================ -->
+<section class="slide" id="slide-7">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">VIM SURVIVAL</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>Vim 生存技：4 个动作够用了</h2>
+
+    <div class="vim-grid" style="margin-top: var(--content-gap);">
+      <div class="vim-card reveal" style="--delay: 0.26s;">
+        <div class="vim-key">i</div>
+        <div class="vim-action" data-edit>进入编辑模式</div>
+        <div class="vim-desc" data-edit>按下后才能开始输入内容</div>
+      </div>
+      <div class="vim-card reveal" style="--delay: 0.34s;">
+        <div class="vim-key">Esc</div>
+        <div class="vim-action" data-edit>退出编辑模式</div>
+        <div class="vim-desc" data-edit>从编辑模式回到命令模式</div>
+      </div>
+      <div class="vim-card reveal" style="--delay: 0.42s;">
+        <div class="vim-key">:wq</div>
+        <div class="vim-action" data-edit>保存并退出</div>
+        <div class="vim-desc" data-edit>write + quit，最常用</div>
+      </div>
+      <div class="vim-card reveal" style="--delay: 0.50s;">
+        <div class="vim-key">:q!</div>
+        <div class="vim-action" data-edit>不保存强制退出</div>
+        <div class="vim-desc" data-edit>写乱了，丢掉改动退出</div>
+      </div>
+    </div>
+
+    <p class="caption reveal" style="--delay: 0.62s; margin-top: var(--content-gap);" data-edit>
+      被困在 Vim 里是初学者最常见的经历。记住这 4 个动作，就不会再被困住了。
+    </p>
+
+    <div class="code-block reveal" style="--delay: 0.70s; margin-top: var(--element-gap); font-size: var(--small-size);" data-edit><span class="cmt"># 完整流程：</span>  <span class="cmd">vim hello.txt</span>  →  <span class="cmd">i</span>  →  输入内容  →  <span class="cmd">Esc</span>  →  <span class="cmd">:wq</span>  →  回车</div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 8 · Linux 直觉 / Windows 用户
+     ============================================================ -->
+<section class="slide" id="slide-8">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">LINUX INTUITION</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>Linux 直觉：一种感觉，不是技能</h2>
+
+    <div class="two-col" style="margin-top: var(--content-gap);">
+
+      <div class="split-panel reveal" style="--delay: 0.28s;">
+        <div class="split-label teal">Linux 直觉是什么</div>
+        <div class="split-title" data-edit>感受，而不是"会 Linux"</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>电脑里有一层一层的目录结构</li>
+          <li data-edit>你的动作总是在某个路径下发生</li>
+          <li data-edit>开发工作很多时候是在处理文本文件</li>
+          <li data-edit>服务器通常没有桌面，只有终端</li>
+        </ul>
+      </div>
+
+      <div class="split-panel reveal" style="--delay: 0.38s;">
+        <div class="split-label">Windows 用户</div>
+        <div class="split-title" data-edit>会有一些显著不同</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>路径写法和部分命令会有差异</li>
+          <li data-edit>遇到平台差异时需要自己额外处理</li>
+          <li data-edit>推荐安装 Git Bash 或 WSL 获得更接近课程主线的环境</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <p class="caption dim reveal" style="--delay: 0.52s; margin-top: var(--content-gap);" data-edit>
+      这一节在提前适应后面的服务器工作环境——后面的课程里你会越来越频繁地感受到这一点。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 9 · 工作习惯
+     ============================================================ -->
+<section class="slide" id="slide-9">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">HABITS</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>从这一节开始建立的习惯</h2>
+
+    <div class="check-grid" style="margin-top: var(--content-gap);">
+      <div class="check-card done reveal" style="--delay: 0.26s;">
+        <div class="check-icon"></div>
+        <div class="check-text" data-edit>一进终端先确认路径——先看自己在哪，再做下一步</div>
+      </div>
+      <div class="check-card done reveal" style="--delay: 0.32s;">
+        <div class="check-icon"></div>
+        <div class="check-text" data-edit>每做一步，立刻用 <span class="token">pwd</span>、<span class="token">ls</span>、<span class="token">cat</span> 观察结果</div>
+      </div>
+      <div class="check-card done reveal" style="--delay: 0.38s;">
+        <div class="check-icon"></div>
+        <div class="check-text" data-edit>删除前多看一眼——先 <span class="token">pwd</span> 确认路径，再 <span class="token">ls</span> 确认目标</div>
+      </div>
+      <div class="check-card done reveal" style="--delay: 0.44s;">
+        <div class="check-icon"></div>
+        <div class="check-text" data-edit>多做几次完整闭环：创建→进入→编辑→查看→删除，终端就不再是黑箱</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 10 · 结束
+     ============================================================ -->
+<section class="slide quote-slide" id="slide-10">
+  <div class="slide-content" style="justify-content: center; align-items: flex-start;">
+
+    <img
+      class="brand-icon-closing reveal"
+      style="--delay: 0.05s;"
+      src="assets/logo/icon-light.svg"
+      alt="零到全栈"
+    />
+
+    <p class="quote-text reveal-blur" style="--delay: 0.22s; font-size: clamp(1.4rem, 4.2vw, 3.4rem);" data-edit>
+      终端不再是黑箱。<br>
+      <em>接下来，我们去看互联网是怎么工作的</em>。
+    </p>
+
+    <p class="caption dim reveal" style="--delay: 0.50s; margin-top: var(--content-gap); font-family: var(--font-mono); letter-spacing: 0.06em;">
+      零到全栈 · 模块 2.2 完
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+class SlidePresentation {
+  constructor() {
+    this.slides       = document.querySelectorAll('.slide');
+    this.currentSlide = 0;
+    this.progressBar  = document.getElementById('progressBar');
+    this.navDotsCont  = document.getElementById('navDots');
+    this.setupIntersectionObserver();
+    this.buildNavDots();
+    this.setupKeyboardNav();
+    this.setupWheelNav();
+    this.setupTouchNav();
+    this.setupScrollProgress();
+    this.slides[0].classList.add('visible');
+    this.syncProgress(0);
+  }
+  setupIntersectionObserver() {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          this.currentSlide = Array.from(this.slides).indexOf(entry.target);
+          this.syncProgress(this.currentSlide);
+          this.updateDots(this.currentSlide);
+        }
+      });
+    }, { threshold: 0.5 });
+    this.slides.forEach(s => obs.observe(s));
+  }
+  buildNavDots() {
+    this.navDotsCont.innerHTML = '';
+    this.slides.forEach((_, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      btn.setAttribute('aria-label', `幻灯片 ${i + 1}`);
+      btn.addEventListener('click', () => this.goTo(i));
+      this.navDotsCont.appendChild(btn);
+    });
+  }
+  updateDots(idx) {
+    document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  }
+  setupKeyboardNav() {
+    document.addEventListener('keydown', e => {
+      if (e.target.getAttribute('contenteditable')) return;
+      if (['ArrowDown', 'ArrowRight', 'PageDown'].includes(e.key) || e.key === ' ') {
+        e.preventDefault(); this.goTo(this.currentSlide + 1);
+      } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
+        e.preventDefault(); this.goTo(this.currentSlide - 1);
+      }
+    });
+  }
+  setupWheelNav() {
+    let last = 0;
+    document.addEventListener('wheel', e => {
+      const now = Date.now();
+      if (now - last < 700) return;
+      last = now;
+      if (e.deltaY > 0) this.goTo(this.currentSlide + 1);
+      else              this.goTo(this.currentSlide - 1);
+    }, { passive: true });
+  }
+  setupTouchNav() {
+    let startY = 0;
+    document.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+    document.addEventListener('touchend', e => {
+      const dy = startY - e.changedTouches[0].clientY;
+      if (Math.abs(dy) > 48) {
+        if (dy > 0) this.goTo(this.currentSlide + 1);
+        else        this.goTo(this.currentSlide - 1);
+      }
+    }, { passive: true });
+  }
+  setupScrollProgress() {
+    window.addEventListener('scroll', () => {
+      const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+      this.progressBar.style.width = pct + '%';
+    }, { passive: true });
+  }
+  syncProgress(idx) {
+    const pct = this.slides.length > 1 ? (idx / (this.slides.length - 1)) * 100 : 100;
+    this.progressBar.style.width = pct + '%';
+  }
+  goTo(idx) {
+    if (idx < 0 || idx >= this.slides.length) return;
+    this.slides[idx].scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+class InlineEditor {
+  constructor() {
+    this.isActive   = false;
+    this.storage    = this._load();
+    this.editToggle = document.getElementById('editToggle');
+    this.editBanner = document.getElementById('editBanner');
+    this.hotzone    = document.getElementById('editHotzone');
+    this._applyStored();
+    this._setupHotzone();
+    this._setupKeyboard();
+    this._setupSave();
+  }
+  _load() {
+    try { return JSON.parse(localStorage.getItem('zt-slides-2.2') || '{}'); }
+    catch { return {}; }
+  }
+  _applyStored() {
+    Object.entries(this.storage).forEach(([id, html]) => {
+      const el = document.querySelector(`[data-edit-id="${id}"]`);
+      if (el) el.innerHTML = html;
+    });
+  }
+  toggleEditMode() {
+    this.isActive = !this.isActive;
+    document.body.classList.toggle('edit-active', this.isActive);
+    this.editToggle.classList.toggle('active', this.isActive);
+    this.editBanner.classList.toggle('active', this.isActive);
+    const editables = document.querySelectorAll('[data-edit]');
+    editables.forEach((el, i) => {
+      el.setAttribute('data-edit-id', 'e' + i);
+      if (this.isActive) { el.setAttribute('contenteditable', 'true'); }
+      else { el.removeAttribute('contenteditable'); this.storage['e' + i] = el.innerHTML; }
+    });
+    if (!this.isActive) localStorage.setItem('zt-slides-2.2', JSON.stringify(this.storage));
+  }
+  _setupHotzone() {
+    let hideTimer = null;
+    const show = () => { clearTimeout(hideTimer); if (!this.isActive) this.editToggle.classList.add('show'); };
+    const hide = () => { hideTimer = setTimeout(() => { if (!this.isActive) this.editToggle.classList.remove('show'); }, 400); };
+    this.hotzone.addEventListener('mouseenter', show);
+    this.hotzone.addEventListener('mouseleave', hide);
+    this.hotzone.addEventListener('click', () => this.toggleEditMode());
+    this.editToggle.addEventListener('mouseenter', show);
+    this.editToggle.addEventListener('mouseleave', hide);
+    this.editToggle.addEventListener('click', () => this.toggleEditMode());
+  }
+  _setupKeyboard() {
+    document.addEventListener('keydown', e => {
+      if ((e.key === 'e' || e.key === 'E') && !e.target.getAttribute('contenteditable')) this.toggleEditMode();
+    });
+  }
+  _setupSave() {
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); this._exportFile(); }
+    });
+  }
+  _exportFile() {
+    const editEls = Array.from(document.querySelectorAll('[contenteditable]'));
+    editEls.forEach(el => el.removeAttribute('contenteditable'));
+    document.body.classList.remove('edit-active');
+    this.editToggle?.classList.remove('active', 'show');
+    this.editBanner?.classList.remove('active', 'show');
+    const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    document.body.classList.add('edit-active');
+    editEls.forEach(el => el.setAttribute('contenteditable', 'true'));
+    this.editToggle?.classList.add('active');
+    this.editBanner?.classList.add('active');
+    const blob = new Blob([html], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'slides-模块2.2.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+}
+
+class CardHighlighter {
+  constructor(presentation) {
+    this.presentation  = presentation;
+    this.CONTAINER_SEL = '.two-col, .three-col, .doubt-list, .cmd-grid, .vim-grid, .check-grid, .flow-row';
+    this.CARD_SEL      = '.split-panel, .col-card, .doubt-card, .cmd-row, .vim-card, .check-card, .flow-step';
+    this._setupClicks();
+    this._setupKeyboard();
+  }
+  _getCards(container) { return Array.from(container.querySelectorAll(this.CARD_SEL)); }
+  _currentContainer() {
+    const slide = document.querySelectorAll('.slide')[this.presentation.currentSlide];
+    return slide ? slide.querySelector(this.CONTAINER_SEL) : null;
+  }
+  highlight(container, index) {
+    const cards = this._getCards(container);
+    if (!cards[index]) return;
+    const already = cards[index].classList.contains('card-highlighted');
+    this.clear(container);
+    if (!already) { container.classList.add('has-selection'); cards[index].classList.add('card-highlighted'); }
+  }
+  clear(container) {
+    container.classList.remove('has-selection');
+    this._getCards(container).forEach(c => c.classList.remove('card-highlighted'));
+  }
+  _setupClicks() {
+    document.querySelectorAll(this.CONTAINER_SEL).forEach(container => {
+      this._getCards(container).forEach((card, i) => {
+        card.addEventListener('click', e => {
+          if (document.body.classList.contains('edit-active')) return;
+          e.stopPropagation();
+          this.highlight(container, i);
+        });
+      });
+      container.addEventListener('click', () => {
+        if (document.body.classList.contains('edit-active')) return;
+        this.clear(container);
+      });
+    });
+  }
+  _setupKeyboard() {
+    document.addEventListener('keydown', e => {
+      if (e.target.getAttribute('contenteditable')) return;
+      if (e.key === 'Escape') { const c = this._currentContainer(); if (c) this.clear(c); return; }
+      const num = parseInt(e.key);
+      if (isNaN(num) || num < 1 || num > 9) return;
+      const c = this._currentContainer();
+      if (!c) return;
+      const cards = this._getCards(c);
+      if (num > cards.length) return;
+      e.preventDefault();
+      this.highlight(c, num - 1);
+    });
+  }
+}
+
+/* === THEME TOGGLE === */
+class ThemeToggle {
+  constructor() {
+    this.KEY    = 'zt-theme';
+    this.isDark = localStorage.getItem(this.KEY) === 'dark';
+    this._apply();
+    document.getElementById('themeToggle')
+      ?.addEventListener('click', () => this.toggle());
+  }
+  toggle() {
+    this.isDark = !this.isDark;
+    localStorage.setItem(this.KEY, this.isDark ? 'dark' : 'light');
+    this._apply();
+  }
+  _apply() {
+    document.documentElement.classList.toggle('dark', this.isDark);
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = this.isDark ? '☀' : '☾';
+    document.querySelectorAll('.brand-icon-closing').forEach(img => {
+      img.src = img.src.replace(
+        this.isDark ? 'icon-light.svg' : 'icon-dark.svg',
+        this.isDark ? 'icon-dark.svg'  : 'icon-light.svg'
+      );
+    });
+  }
+}
+
+const presentation = new SlidePresentation();
+const editor       = new InlineEditor();
+const highlighter  = new CardHighlighter(presentation);
+const themeToggle  = new ThemeToggle();
+</script>
+
+</body>
+</html>

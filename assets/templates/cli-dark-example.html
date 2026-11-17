@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>现代 CLI AI 编程工具 · Easy Vibe · Stage 2</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    @font-face {
+      font-family: 'LXGW WenKai';
+      src: url('assets/fonts/LXGWWenKai-Light.ttf') format('truetype');
+      font-weight: 300; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'LXGW WenKai';
+      src: url('assets/fonts/LXGWWenKai-Regular.ttf') format('truetype');
+      font-weight: 400; font-style: normal; font-display: swap;
+    }
+    @font-face {
+      font-family: 'LXGW WenKai';
+      src: url('assets/fonts/LXGWWenKai-Medium.ttf') format('truetype');
+      font-weight: 500; font-style: normal; font-display: swap;
+    }
+
+    /* DARK 为默认主题：:root 即深色变量 */
+    :root {
+      --bg:              #161823;
+      --surface:         #1C1F2E;
+      --surface-2:       #222634;
+      --text:            #E9EBF0;
+      --text-secondary:  #9AABB0;
+      --text-dim:        #75878A;
+      --border:          #2C3145;
+      --border-subtle:   #232738;
+      --accent:          #44CEF6;
+      --accent-light:    #7ADFFA;
+      --accent-muted:    rgba(68, 206, 246, 0.12);
+
+      --glow-primary:       rgba(68, 206, 246, 0.13);
+      --glow-secondary:     rgba(68, 206, 246, 0.07);
+      --glow-quote:         rgba(68, 206, 246, 0.08);
+      --highlight-glow:     rgba(68, 206, 246, 0.2);
+      --edit-outline-color: rgba(68, 206, 246, 0.35);
+
+      --font-zh:   'LXGW WenKai', 'Songti SC', Georgia, serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+      --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration:  0.65s;
+
+      --title-size:    clamp(2.2rem, 5.5vw, 4.2rem);
+      --h2-size:       clamp(1.75rem, 3.4vw, 2.5rem);
+      --h3-size:       clamp(1.2rem, 2.3vw, 1.7rem);
+      --body-size:     clamp(1.05rem, 1.6vw, 1.25rem);
+      --small-size:    clamp(0.9rem, 1.15vw, 1.05rem);
+      --slide-padding: clamp(1.5rem, 5vw, 5rem);
+      --content-gap:   clamp(0.75rem, 2.5vw, 2.5rem);
+      --element-gap:   clamp(0.3rem, 1vw, 0.9rem);
+    }
+
+
+    /* ============================================================
+       LIGHT MODE OVERRIDES — 去掉 html.dark 后生效
+       ============================================================ */
+    html:not(.dark) {
+      --bg:              #F5F7F9;
+      --surface:         #FFFFFF;
+      --surface-2:       #ECF1F4;
+      --text:            #1B1E26;
+      --text-secondary:  #54666C;
+      --text-dim:        #8FA0A3;
+      --border:          #DCE3E7;
+      --border-subtle:   #E9EEF1;
+      --accent:          #0E9BD0;
+      --accent-light:    #2FB4E3;
+      --accent-muted:    #E2F5FC;
+
+      --glow-primary:       rgba(14, 155, 208, 0.09);
+      --glow-secondary:     rgba(14, 155, 208, 0.05);
+      --glow-quote:         rgba(14, 155, 208, 0.06);
+      --highlight-glow:     rgba(14, 155, 208, 0.15);
+      --edit-outline-color: rgba(14, 155, 208, 0.35);
+    }
+
+    html, body { height: 100%; overflow-x: hidden; }
+    html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
+    .slide {
+      width: 100vw; height: 100vh; height: 100dvh;
+      overflow: hidden; scroll-snap-align: start;
+      display: flex; flex-direction: column; position: relative;
+    }
+    .slide-content {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; max-height: 100%;
+      overflow: hidden; padding: var(--slide-padding);
+    }
+    img, .image-container { max-width: 100%; max-height: min(50vh, 400px); object-fit: contain; }
+    .img-frame {
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--surface); align-self: flex-start;
+    }
+
+    @media (max-height: 700px) {
+      :root {
+        --slide-padding: clamp(0.9rem, 3vw, 2rem);
+        --content-gap:   clamp(0.5rem, 1.5vw, 1rem);
+        --title-size:    clamp(1.8rem, 4.5vw, 2.8rem);
+        --h2-size:       clamp(1.4rem, 3vw, 1.9rem);
+      }
+    }
+    @media (max-height: 600px) {
+      :root {
+        --slide-padding: clamp(0.75rem, 2.5vw, 1.5rem);
+        --content-gap:   clamp(0.4rem, 1.2vw, 0.8rem);
+        --title-size:    clamp(1.6rem, 4vw, 2.4rem);
+        --h2-size:       clamp(1.3rem, 3vw, 1.7rem);
+        --body-size:     clamp(0.95rem, 1.3vw, 1.1rem);
+        --small-size:    clamp(0.85rem, 1.1vw, 1rem);
+      }
+      .nav-dots { display: none; }
+    }
+    @media (max-height: 500px) {
+      :root {
+        --slide-padding: clamp(0.6rem, 2vw, 1rem);
+        --title-size:    clamp(1.4rem, 3.5vw, 1.8rem);
+        --h2-size:       clamp(1.2rem, 2.5vw, 1.5rem);
+        --body-size:     clamp(0.9rem, 1.2vw, 1.05rem);
+        --small-size:    clamp(0.8rem, 1vw, 0.95rem);
+      }
+    }
+    @media (max-width: 600px) {
+      :root { --title-size: clamp(1.25rem, 7vw, 2.5rem); }
+      .two-col   { grid-template-columns: 1fr !important; }
+      .three-col { grid-template-columns: 1fr !important; }
+      .cmd-grid  { grid-template-columns: 1fr !important; }
+      .check-grid { grid-template-columns: 1fr !important; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+      html { scroll-behavior: auto; }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-zh); }
+    ul { list-style: none; }
+
+    h1 { font-size: var(--title-size); font-weight: 300; line-height: 1.25; color: var(--text); }
+    h2 { font-size: var(--h2-size);    font-weight: 400; line-height: 1.3;  color: var(--text); }
+
+    /* Reveal animations */
+    .reveal {
+      opacity: 0; transform: translateY(22px);
+      transition: opacity var(--duration) var(--ease-expo), transform var(--duration) var(--ease-expo);
+      transition-delay: var(--delay, 0s);
+    }
+    .slide.visible .reveal { opacity: 1; transform: translateY(0); }
+    .reveal-blur {
+      opacity: 0; filter: blur(8px);
+      transition: opacity 0.8s var(--ease-expo), filter 0.8s var(--ease-expo);
+      transition-delay: var(--delay, 0s);
+    }
+    .slide.visible .reveal-blur { opacity: 1; filter: blur(0); }
+
+    /* Progress bar + nav dots */
+    .progress-bar {
+      position: fixed; top: 0; left: 0; height: 2px;
+      background: var(--accent); z-index: 1000;
+      width: 0%; transition: width 0.35s ease; pointer-events: none;
+    }
+    .nav-dots {
+      position: fixed; right: clamp(10px, 1.8vw, 20px); top: 50%;
+      transform: translateY(-50%); z-index: 1000;
+      display: flex; flex-direction: column; gap: 7px;
+    }
+    .nav-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--text-dim); cursor: pointer; border: none; padding: 0;
+      transition: background 0.25s, transform 0.25s;
+    }
+    .nav-dot.active { background: var(--accent); transform: scale(1.7); }
+
+    /* Shared components */
+    .accent-line {
+      width: clamp(36px, 5vw, 64px); height: 3px;
+      background: var(--accent); border-radius: 2px;
+      margin-bottom: var(--content-gap); flex-shrink: 0;
+    }
+    .slide-label {
+      font-family: var(--font-mono); font-size: var(--small-size);
+      color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase;
+      margin-bottom: var(--element-gap); flex-shrink: 0;
+    }
+    .module-tag {
+      display: inline-flex; align-items: center;
+      background: var(--accent-muted); border: 1px solid var(--accent);
+      color: var(--accent); padding: 3px 10px; border-radius: 4px;
+      font-family: var(--font-mono); font-size: var(--small-size);
+      letter-spacing: 0.08em; margin-bottom: clamp(1rem, 2.5vh, 1.75rem);
+      flex-shrink: 0; width: fit-content;
+    }
+    .quote-text {
+      font-size: clamp(1.3rem, 3.8vw, 3rem);
+      font-weight: 300; line-height: 1.5; color: var(--text);
+    }
+    .quote-text em { font-style: normal; color: var(--accent); font-weight: 400; }
+    .caption { font-size: var(--small-size); color: var(--text-secondary); line-height: 1.6; }
+    .caption.dim { color: var(--text-dim); }
+
+    /* Two-col */
+    .two-col {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: clamp(0.75rem, 2.5vw, 2.5rem); align-items: stretch;
+    }
+    .split-panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: clamp(0.9rem, 2vw, 1.6rem);
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .split-panel.accent-panel { border-color: var(--accent); background: var(--accent-muted); }
+    .split-label { font-family: var(--font-mono); font-size: var(--small-size); color: var(--text-dim); }
+    .split-label.teal { color: var(--accent); }
+    .split-title { font-size: var(--h3-size); color: var(--text); line-height: 1.3; }
+    .split-body  { font-size: var(--small-size); color: var(--text-secondary); line-height: 1.6; }
+    .split-items { display: flex; flex-direction: column; gap: 0; }
+    .split-items li {
+      font-size: var(--small-size); color: var(--text-secondary); line-height: 1.5;
+      padding: 5px 0; border-bottom: 1px solid var(--border-subtle);
+    }
+    .split-items li:last-child { border-bottom: none; }
+
+    /* Three-col */
+    .three-col {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: clamp(0.6rem, 1.8vw, 1.4rem);
+    }
+    .col-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: clamp(0.9rem, 2vw, 1.5rem);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .col-card-num   { font-family: var(--font-mono); font-size: var(--small-size); color: var(--accent); }
+    .col-card-title { font-size: var(--h3-size); color: var(--text); }
+    .col-card-desc  { font-size: var(--small-size); color: var(--text-secondary); line-height: 1.6; }
+
+    /* Doubt list */
+    .doubt-list { display: flex; flex-direction: column; gap: clamp(0.4rem, 1.2vh, 0.9rem); }
+    .doubt-card {
+      background: var(--surface); border-left: 2px solid var(--border);
+      border-radius: 0 6px 6px 0; padding: clamp(0.7rem, 1.8vw, 1.1rem);
+      font-size: var(--body-size); color: var(--text-secondary); line-height: 1.5;
+    }
+
+    /* Dash list */
+    .dash-list { display: flex; flex-direction: column; gap: var(--element-gap); }
+    .dash-list li {
+      display: flex; align-items: flex-start; gap: 12px;
+      font-size: var(--body-size); color: var(--text-secondary); line-height: 1.65;
+    }
+    .dash-list li::before {
+      content: '—'; color: var(--accent); flex-shrink: 0;
+      margin-top: 1px; font-family: var(--font-mono);
+    }
+
+    /* Inline code token */
+    .token {
+      font-family: var(--font-mono); font-size: 0.9em;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 3px; padding: 1px 6px; color: var(--accent-light);
+    }
+
+    /* Code block */
+    .code-block {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: clamp(0.8rem, 1.8vw, 1.4rem);
+      font-family: var(--font-mono); font-size: var(--small-size);
+      color: var(--text-secondary); line-height: 1.9;
+      white-space: pre; overflow-x: auto; flex-shrink: 0;
+    }
+    .code-block .cmd   { color: var(--accent-light); }
+    .code-block .cmt   { color: var(--text-dim); }
+    .code-block .path  { color: var(--accent); }
+
+    /* Compare table */
+    .compare-table {
+      width: 100%; border-collapse: collapse;
+      font-size: var(--small-size);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+    }
+    .compare-table th {
+      font-family: var(--font-mono); font-weight: 500; color: var(--accent);
+      text-align: left; padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2); letter-spacing: 0.04em;
+    }
+    .compare-table td {
+      padding: 6px 14px; color: var(--text-secondary); line-height: 1.45;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table td:first-child { color: var(--text); }
+    .compare-table td.win { color: var(--accent); font-family: var(--font-mono); }
+
+    /* Command reference grid */
+    .cmd-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: clamp(0.3rem, 0.8vw, 0.6rem);
+    }
+    .cmd-row {
+      display: flex; align-items: baseline; gap: 10px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: clamp(0.5rem, 1.2vw, 0.85rem) clamp(0.7rem, 1.4vw, 1.1rem);
+    }
+    .cmd-name {
+      font-family: var(--font-mono); font-size: var(--small-size);
+      color: var(--accent-light); white-space: nowrap; flex-shrink: 0;
+      min-width: clamp(3rem, 5vw, 5rem);
+    }
+    .cmd-desc {
+      font-size: var(--small-size); color: var(--text-secondary); line-height: 1.4;
+    }
+
+    /* Vim key cards */
+    .vim-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: clamp(0.6rem, 1.5vw, 1.2rem);
+    }
+    .vim-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: clamp(0.8rem, 2vw, 1.4rem);
+      display: flex; flex-direction: column; gap: 8px; align-items: center;
+      text-align: center;
+    }
+    .vim-key {
+      font-family: var(--font-mono); font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+      color: var(--accent); background: var(--accent-muted);
+      border: 1px solid var(--accent); border-radius: 5px;
+      padding: 4px 12px; display: inline-block;
+    }
+    .vim-action { font-size: var(--small-size); color: var(--text); font-weight: 500; }
+    .vim-desc   { font-size: var(--small-size); color: var(--text-secondary); line-height: 1.5; }
+
+    /* Practice flow */
+    .flow-row {
+      display: flex; align-items: stretch; gap: clamp(0.4rem, 1vw, 0.8rem);
+      flex-wrap: nowrap; overflow-x: auto;
+    }
+    .flow-step {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: clamp(0.6rem, 1.4vw, 1rem) clamp(0.8rem, 1.8vw, 1.3rem);
+      display: flex; flex-direction: column; gap: 4px;
+      flex: 1; min-width: 0; text-align: center;
+    }
+    .flow-step-num  { font-family: var(--font-mono); font-size: var(--small-size); color: var(--accent); }
+    .flow-step-cmd  { font-family: var(--font-mono); font-size: var(--small-size); color: var(--accent-light); }
+    .flow-step-desc { font-size: var(--small-size); color: var(--text-secondary); line-height: 1.4; }
+    .flow-arrow {
+      color: var(--text-dim); font-size: clamp(1rem, 1.5vw, 1.3rem);
+      flex-shrink: 0; font-family: var(--font-mono);
+      display: flex; align-items: center;
+    }
+
+    /* Check grid */
+    .check-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: clamp(0.5rem, 1.4vw, 1rem);
+    }
+    .check-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: clamp(0.75rem, 1.6vw, 1.2rem);
+      display: flex; gap: clamp(0.5rem, 1vw, 0.8rem); align-items: flex-start;
+    }
+    .check-icon {
+      width: clamp(16px, 1.8vw, 22px); height: clamp(16px, 1.8vw, 22px);
+      flex-shrink: 0; margin-top: 2px;
+      border: 1.5px solid var(--border); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .check-card.done .check-icon {
+      background: var(--accent-muted); border-color: var(--accent);
+    }
+    .check-card.done .check-icon::after {
+      content: '✓'; font-size: 0.72em; color: var(--accent); font-family: var(--font-mono);
+    }
+    .check-text { font-size: var(--small-size); color: var(--text-secondary); line-height: 1.6; }
+
+    /* Card highlighting */
+    .two-col, .three-col, .doubt-list, .cmd-grid, .vim-grid, .check-grid, .flow-row {
+      cursor: default;
+    }
+    .split-panel, .col-card, .doubt-card, .cmd-row, .vim-card, .check-card, .flow-step {
+      cursor: pointer;
+      transition: opacity 0.3s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .two-col.has-selection      .split-panel:not(.card-highlighted),
+    .three-col.has-selection    .col-card:not(.card-highlighted),
+    .doubt-list.has-selection   .doubt-card:not(.card-highlighted),
+    .cmd-grid.has-selection     .cmd-row:not(.card-highlighted),
+    .vim-grid.has-selection     .vim-card:not(.card-highlighted),
+    .check-grid.has-selection   .check-card:not(.card-highlighted),
+    .flow-row.has-selection     .flow-step:not(.card-highlighted) {
+      opacity: 0.25; transform: scale(0.97);
+    }
+    .split-panel.card-highlighted, .col-card.card-highlighted,
+    .doubt-card.card-highlighted, .cmd-row.card-highlighted,
+    .vim-card.card-highlighted, .check-card.card-highlighted {
+      box-shadow: 0 0 0 2px var(--accent), 0 4px 20px rgba(68,206,246,0.2);
+      transform: translateY(-2px) scale(1.01);
+    }
+    .flow-step.card-highlighted {
+      border-color: var(--accent);
+      background: var(--accent-muted);
+    }
+
+    /* Brand */
+    .brand-icon-closing {
+      height: clamp(4rem, 9vh, 7rem); width: auto;
+      display: block; margin-bottom: var(--content-gap);
+      opacity: 0.9; flex-shrink: 0;
+    }
+    .brand-line {
+      display: flex; align-items: center; gap: 14px;
+      font-family: var(--font-mono); font-size: var(--small-size);
+      color: var(--text-dim); margin-top: clamp(1.5rem, 3.5vh, 2.5rem);
+    }
+    .brand-line::before {
+      content: ''; display: block; width: 28px; height: 1px;
+      background: var(--text-dim); flex-shrink: 0;
+    }
+    .title-slide::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse at 75% 15%, rgba(68,206,246,0.13) 0%, transparent 55%),
+        radial-gradient(ellipse at 15% 85%, rgba(68,206,246,0.07) 0%, transparent 45%);
+    }
+    .quote-slide::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse at 50% 45%, rgba(68,206,246,0.08) 0%, transparent 60%);
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      position: fixed; bottom: 18px; right: 22px; z-index: 10002;
+      width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text-secondary);
+      font-size: 16px; cursor: pointer; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.25s, color 0.25s, background 0.25s;
+    }
+    .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Inline edit */
+    .edit-hotzone {
+      position: fixed; top: 0; left: 0; width: 80px; height: 80px;
+      z-index: 10000; cursor: pointer;
+    }
+    .edit-toggle {
+      position: fixed; top: 14px; left: 14px; z-index: 10001;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text-dim); padding: 5px 10px; border-radius: 5px;
+      font-family: var(--font-mono); font-size: 11px; cursor: pointer;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+      letter-spacing: 0.05em;
+    }
+    .edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+    .edit-toggle.active { background: var(--accent-muted); border-color: var(--accent); color: var(--accent); }
+    .edit-banner {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
+      background: var(--accent-muted); border-top: 1px solid var(--accent);
+      color: var(--accent); font-family: var(--font-mono); font-size: 11px;
+      padding: 7px 16px; display: flex; justify-content: space-between;
+      align-items: center; opacity: 0; pointer-events: none;
+      transition: opacity 0.25s; letter-spacing: 0.04em;
+    }
+    .edit-banner.active { opacity: 1; pointer-events: auto; }
+    body.edit-active [data-edit] {
+      outline: 1px dashed rgba(68,206,246,0.35); border-radius: 2px; cursor: text;
+    }
+    body.edit-active [data-edit]:focus {
+      outline: 1px solid var(--accent); background: rgba(68,206,246,0.05);
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<nav class="nav-dots" id="navDots" aria-label="幻灯片导航"></nav>
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle">✏ EDIT</button>
+<div class="edit-banner" id="editBanner">
+  <span>编辑模式 · 点击文字即可修改 · Ctrl+S 导出</span>
+  <span style="opacity:0.6">再次按 E 或点击左上角退出</span>
+</div>
+
+
+<!-- Theme toggle -->
+<button class="theme-toggle" id="themeToggle" title="切换深浅色模式">☾</button>
+
+<!-- ============================================================
+     SLIDE 1 · 封面
+     ============================================================ -->
+<section class="slide title-slide" id="slide-1">
+  <div class="slide-content">
+
+    <div class="module-tag reveal" style="--delay: 0.05s;">EASY VIBE · STAGE 2 BACKEND</div>
+
+    <h1 class="reveal" style="--delay: 0.25s;" data-edit>
+      现代 CLI AI 编程工具
+    </h1>
+
+    <p class="reveal" style="--delay: 0.35s; font-size: var(--h3-size); color: var(--text-secondary); font-weight: 300; margin-top: 0.5rem;" data-edit>
+      在终端里运行的 AI 编程 Agent——为什么实战中优先用它，而不是 IDE 内置 Agent
+    </p>
+
+    <div class="brand-line reveal" style="--delay: 0.48s;" data-edit>
+      Easy Vibe 教程 · Stage 2 · 现代 CLI 编程工具
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 2 · 从 CLI 说起
+     ============================================================ -->
+<section class="slide" id="slide-2">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">FROM CLI</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>从 CLI 说起</h2>
+
+    <div class="two-col" style="margin-top: var(--content-gap);">
+      <div class="split-panel reveal" style="--delay: 0.28s;">
+        <div class="split-label">GUI（图形界面）</div>
+        <div class="split-title" data-edit>鼠标点来点去</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>按钮、窗口、菜单，点击操作</li>
+          <li data-edit>不需要输入任何命令</li>
+          <li data-edit>但要额外绘制界面，更耗资源</li>
+        </ul>
+      </div>
+      <div class="split-panel accent-panel reveal" style="--delay: 0.38s;">
+        <div class="split-label teal">CLI（命令行）</div>
+        <div class="split-title" data-edit>纯文本命令操作软件</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>Windows 常见终端：cmd、PowerShell</li>
+          <li data-edit>工业界最常见的接口形式，省资源</li>
+          <li data-edit>连接大规模服务器集群时，只有 CLI</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="caption reveal" style="--delay: 0.52s; margin-top: var(--content-gap);" data-edit>
+      新手不用背命令——让 <strong style="color: var(--text)">CLI AI 编程工具</strong>帮你执行所有 CLI 操作：进文件夹、搜文件、跑项目，全靠对话完成。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 3 · 和 AI IDE 有什么不同
+     ============================================================ -->
+<section class="slide" id="slide-3">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">VS AI IDE</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>和 AI IDE 有什么不同</h2>
+
+    <div class="two-col" style="margin-top: var(--content-gap);">
+      <div class="split-panel reveal" style="--delay: 0.28s;">
+        <div class="split-label">类比 z.ai</div>
+        <div class="split-title" data-edit>一种特殊的 z.ai</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>同样只要一个简单的对话入口</li>
+          <li data-edit>自动为你执行所有需要的操作</li>
+          <li data-edit>有时需手动打开浏览器查看最终效果</li>
+        </ul>
+      </div>
+      <div class="split-panel reveal" style="--delay: 0.38s;">
+        <div class="split-label">类比 AI IDE</div>
+        <div class="split-title" data-edit>相当于 IDE 里的 Agent 模块</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>就是 IDE 侧边那块对话区域</li>
+          <li data-edit>各 IDE 实现不同，能力差异大、效果不稳定</li>
+          <li data-edit>CLI 工具多由大厂直接开发：Anthropic、OpenAI</li>
+        </ul>
+      </div>
+    </div>
+
+    <img class="img-frame reveal" style="--delay: 0.48s; margin-top: var(--content-gap); max-height: min(30vh, 250px);" loading="lazy"
+         src="https://datawhalechina.github.io/easy-vibe/assets/image4.JR7yVVON.png"
+         alt="CLI 工具类比 z.ai：一个对话入口自动执行所有操作"
+         onerror="this.style.display='none'" />
+
+    <p class="caption reveal" style="--delay: 0.56s; margin-top: var(--element-gap);" data-edit>
+      Claude Code 本身就是为 Anthropic 内部研发团队服务的工具，从一开始就围绕「满足工程师真实需求」设计。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 4 · Claude Code vs Cursor
+     ============================================================ -->
+<section class="slide" id="slide-4">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">CLAUDE CODE VS CURSOR</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>CLI 工具 vs IDE 内置 Agent</h2>
+
+    <table class="compare-table reveal" style="--delay: 0.26s; margin-top: var(--content-gap);">
+      <tr><th>功能特性</th><th>Claude Code</th><th>Cursor</th><th>更优者</th></tr>
+      <tr><td data-edit>自动任务执行</td><td>✅ 非常强</td><td>❌ 能力有限</td><td class="win">Claude Code</td></tr>
+      <tr><td data-edit>IDE 集成</td><td>❌ 仅命令行</td><td>✅ 原生 VS Code</td><td>Cursor</td></tr>
+      <tr><td data-edit>实时代码补全</td><td>❌ 无</td><td>✅ 体验极佳</td><td>Cursor</td></tr>
+      <tr><td data-edit>多文件操作</td><td>✅ 非常强</td><td>⚠️ 还不错</td><td class="win">Claude Code</td></tr>
+      <tr><td data-edit>GitHub 一体化操作</td><td>✅ 可直接提交</td><td>⚠️ 需要手动操作</td><td class="win">Claude Code</td></tr>
+      <tr><td data-edit>学习成本</td><td>⚠️ 中等</td><td>✅ 上手简单</td><td>Cursor</td></tr>
+      <tr><td data-edit>上下文长度</td><td>✅ 非常长</td><td>⚠️ 较好</td><td class="win">Claude Code</td></tr>
+      <tr><td data-edit>调试辅助</td><td>✅ 自动化</td><td>⚠️ 较多需手动</td><td class="win">Claude Code</td></tr>
+    </table>
+
+    <p class="caption reveal" style="--delay: 0.48s; margin-top: var(--content-gap);" data-edit>
+      简单说：更长的连续对话、更长的上下文窗口、更快的响应（可接自定义模型 API）——编码操作上更聪明、更稳定。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 5 · 常见 CLI AI 编程工具
+     ============================================================ -->
+<section class="slide" id="slide-5">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">THE TOOLKIT</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>首选组合：三大 CLI AI 编程工具</h2>
+
+    <div class="three-col" style="margin-top: var(--content-gap);">
+      <div class="col-card reveal" style="--delay: 0.25s;">
+        <div class="col-card-num">01</div>
+        <div class="col-card-title" data-edit>Claude Code</div>
+        <div class="col-card-desc" data-edit>Anthropic 出品。通过 GLM 4.6 转发 API，体验接近 Claude 4，价格更便宜。</div>
+      </div>
+      <div class="col-card reveal" style="--delay: 0.33s;">
+        <div class="col-card-num">02</div>
+        <div class="col-card-title" data-edit>Codex</div>
+        <div class="col-card-desc" data-edit>OpenAI 出品。使用 GPT-5，整体能力更强，响应快、犯错率低。</div>
+      </div>
+      <div class="col-card reveal" style="--delay: 0.41s;">
+        <div class="col-card-num">03</div>
+        <div class="col-card-title" data-edit>OpenCode</div>
+        <div class="col-card-desc" data-edit>开源平台。自由切换并搭配模型，提供免费模型，更好控制成本。</div>
+      </div>
+    </div>
+
+    <p class="caption reveal" style="--delay: 0.52s; margin-top: var(--content-gap);" data-edit>
+      强烈建议都试一遍：模型更新非常快，按 <strong style="color: var(--text)">性价比 = 效果 ÷ 成本</strong> 选出你的主力工具；某个工具效果一般，就直接换一个继续试验。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 6 · Claude Code 是什么 + 安装
+     ============================================================ -->
+<section class="slide" id="slide-6">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">CLAUDE CODE</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>Claude Code 是什么，怎么装</h2>
+
+    <div class="two-col" style="margin-top: var(--content-gap);">
+      <div class="split-panel reveal" style="--delay: 0.28s;">
+        <div class="split-label">它是什么</div>
+        <div class="split-title" data-edit>Anthropic 出品的终端 AI 编程工具</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>终端为主，也支持作为 VS Code 插件</li>
+          <li data-edit>深度理解整个代码仓库</li>
+          <li data-edit>端到端完成任务：改代码、修 Bug、跑测试</li>
+          <li data-edit>管理 Git 工作流：解决冲突、创建 PR</li>
+          <li data-edit>极长上下文，适合沉浸式 vibe coding</li>
+        </ul>
+      </div>
+      <div class="split-panel accent-panel reveal" style="--delay: 0.38s;">
+        <div class="split-label teal">三分钟装好</div>
+        <div class="code-block" style="margin-top: 10px; font-size: var(--small-size);" data-edit><span class="cmt"># 安装 Claude Code</span>
+<span class="cmd">npm install -g @anthropic-ai/claude-code</span>
+
+<span class="cmt"># 进入你的项目</span>
+<span class="cmd">cd your-awesome-project</span>
+
+<span class="cmt"># 启动 Claude Code（Ctrl+C 退出）</span>
+<span class="cmd">claude</span></div>
+        <p class="split-body" style="margin-top: 10px;" data-edit>觉得命令行安装麻烦？直接让 Trae 的 Agent 帮你完成安装。</p>
+      </div>
+    </div>
+
+    <p class="caption reveal" style="--delay: 0.52s; margin-top: var(--content-gap);" data-edit>
+      官方直连成本高 → 实战中改用<strong style="color: var(--text)">兼容 Anthropic 协议的国产模型 API</strong>。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 7 · 后端方案一：智谱 GLM
+     ============================================================ -->
+<section class="slide" id="slide-7">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">BACKEND · GLM</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>后端方案一：智谱 GLM（推荐）</h2>
+
+    <ul class="dash-list" style="margin-top: var(--content-gap);">
+      <li class="reveal" style="--delay: 0.24s;" data-edit>GLM-4.6 代码能力对标 Claude Sonnet 4，200K 上下文，国内第一梯队</li>
+      <li class="reveal" style="--delay: 0.30s;" data-edit>先获取 API Key：bigmodel.cn（国内版）/ z.ai（国际版）</li>
+      <li class="reveal" style="--delay: 0.36s;" data-edit>可以把配置命令直接交给 Trae 执行；配完<strong style="color: var(--text)">必须重启 Trae</strong>，否则内置终端读不到新变量</li>
+    </ul>
+
+    <div class="code-block reveal" style="--delay: 0.44s; margin-top: var(--content-gap);" data-edit><span class="cmt"># 在 Cmd 中运行以下命令（国内版 GLM）</span>
+<span class="cmt"># 注意将 your_zhipu_api_key 替换为你刚获取的 API Key</span>
+<span class="cmd">setx ANTHROPIC_AUTH_TOKEN your_zhipu_api_key</span>
+<span class="cmd">setx ANTHROPIC_BASE_URL https://open.bigmodel.cn/api/anthropic</span></div>
+
+    <p class="caption dim reveal" style="--delay: 0.54s; margin-top: var(--content-gap);" data-edit>
+      环境变量 = 存在操作系统里的键值对配置；密钥放环境变量里，避免写进代码泄露。国际版把 BASE_URL 换成 https://api.z.ai/api/anthropic 即可。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 8 · 更多兼容后端
+     ============================================================ -->
+<section class="slide" id="slide-8">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">MORE BACKENDS</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>同一思路，接入更多模型</h2>
+
+    <div class="cmd-grid" style="margin-top: var(--content-gap);">
+      <div class="cmd-row reveal" style="--delay: 0.22s;">
+        <span class="cmd-name">Kimi K2</span>
+        <span class="cmd-desc" data-edit>api.moonshot.cn/anthropic —— 200K 上下文，中文理解好</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.26s;">
+        <span class="cmd-name">MiniMax</span>
+        <span class="cmd-desc" data-edit>api.minimax.io/anthropic —— 推理强、响应快（MiniMax-M2.7）</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.30s;">
+        <span class="cmd-name">DeepSeek</span>
+        <span class="cmd-desc" data-edit>api.deepseek.com/anthropic —— 开源、性价比高</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.34s;">
+        <span class="cmd-name">火山引擎</span>
+        <span class="cmd-desc" data-edit>ark.volces.com/api/anthropic —— 企业级稳定，国内访问快</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.38s;">
+        <span class="cmd-name">Siliconflow</span>
+        <span class="cmd-desc" data-edit>api.siliconflow.cn —— 聚合多家开源模型，可自选模型</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.42s;">
+        <span class="cmd-name">阿里百炼</span>
+        <span class="cmd-desc" data-edit>dashscope.aliyuncs.com/apps/anthropic</span>
+      </div>
+    </div>
+
+    <div class="code-block reveal" style="--delay: 0.50s; margin-top: var(--content-gap);" data-edit><span class="cmt"># 以 Kimi K2 为例：换 BASE_URL 和 Token 即可</span>
+<span class="cmd">export ANTHROPIC_BASE_URL=https://api.moonshot.cn/anthropic</span>
+<span class="cmd">export ANTHROPIC_AUTH_TOKEN=sk-YOURKEY</span></div>
+
+    <p class="caption reveal" style="--delay: 0.58s; margin-top: var(--element-gap);" data-edit>
+      担心 token 费用？可以考虑 GLM 月度套餐（约 20 元/月），或先充 10 元做小规模试验。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 9 · Claude Code Router（进阶）
+     ============================================================ -->
+<section class="slide" id="slide-9">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">CLAUDE CODE ROUTER · 进阶</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>Claude Code Router：一个入口，调度所有模型</h2>
+
+    <div class="flow-row reveal" style="--delay: 0.28s; margin-top: var(--content-gap);">
+      <div class="flow-step">
+        <div class="flow-step-num">01</div>
+        <div class="flow-step-desc" data-edit>安装 ccr</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-num">02</div>
+        <div class="flow-step-desc" data-edit>打开 CCR UI 配置页</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-num">03</div>
+        <div class="flow-step-desc" data-edit>Add Provider：填 URL / Key / Models</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-num">04</div>
+        <div class="flow-step-desc" data-edit>Router 设默认模型并保存重启</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-num">05</div>
+        <div class="flow-step-cmd">ccr code</div>
+        <div class="flow-step-desc" data-edit>启动编码工作流</div>
+      </div>
+    </div>
+
+    <div class="code-block reveal" style="--delay: 0.40s; margin-top: var(--content-gap);" data-edit><span class="cmd">npm install -g @anthropic-ai/claude-code</span>
+<span class="cmd">npm install -g @musistudio/claude-code-router</span></div>
+
+    <p class="caption reveal" style="--delay: 0.50s; margin-top: var(--content-gap);" data-edit>
+      开源智能路由：把请求按需分发到几十个平台——后台任务交给本地 Ollama 省钱，长文本 / 长代码给 Gemini，代码讲解给 DeepSeek。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 10 · Claude Code 常用命令
+     ============================================================ -->
+<section class="slide" id="slide-10">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">COMMANDS</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>别只当对话工具：常用命令速查</h2>
+
+    <div class="cmd-grid" style="margin-top: var(--content-gap);">
+      <div class="cmd-row reveal" style="--delay: 0.20s;">
+        <span class="cmd-name">claude</span>
+        <span class="cmd-desc" data-edit>启动交互模式</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.24s;">
+        <span class="cmd-name">claude -c</span>
+        <span class="cmd-desc" data-edit>继续最近的一次会话</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.28s;">
+        <span class="cmd-name">claude -p</span>
+        <span class="cmd-desc" data-edit>一次性提问，结束后自动退出</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.32s;">
+        <span class="cmd-name">/init</span>
+        <span class="cmd-desc" data-edit>用 CLAUDE.md 初始化项目说明</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.36s;">
+        <span class="cmd-name">/clear</span>
+        <span class="cmd-desc" data-edit>清空当前会话上下文，防止信息过载</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.40s;">
+        <span class="cmd-name">/compact</span>
+        <span class="cmd-desc" data-edit>压缩会话历史，减少 token 占用</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.44s;">
+        <span class="cmd-name">/cost</span>
+        <span class="cmd-desc" data-edit>查看当前消费情况</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.48s;">
+        <span class="cmd-name">/model</span>
+        <span class="cmd-desc" data-edit>切换使用的模型（兼容 API 时一般可忽略）</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.52s;">
+        <span class="cmd-name">/help</span>
+        <span class="cmd-desc" data-edit>显示可用命令列表</span>
+      </div>
+      <div class="cmd-row reveal" style="--delay: 0.56s;">
+        <span class="cmd-name">Ctrl+C</span>
+        <span class="cmd-desc" data-edit>退出 Claude Code</span>
+      </div>
+    </div>
+
+    <p class="caption dim reveal" style="--delay: 0.64s; margin-top: var(--content-gap);">
+      完整命令表见官方文档：<span class="token">CLI Reference</span> 与 <span class="token">Slash Commands</span>；高级功能还有 <span class="token">/agents</span> 与 <span class="token">/mcp</span>。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 11 · CLAUDE.md
+     ============================================================ -->
+<section class="slide" id="slide-11">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">CLAUDE.MD</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>CLAUDE.md：项目的记忆文件</h2>
+
+    <div class="two-col" style="margin-top: var(--content-gap);">
+      <div class="split-panel reveal" style="--delay: 0.28s;">
+        <div class="split-label">它是什么</div>
+        <div class="split-title" data-edit>启动对话时自动读取，加入上下文</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>常用 bash 命令、核心文件与工具函数</li>
+          <li data-edit>代码风格约定、测试方式说明</li>
+          <li data-edit>仓库协作规范（分支命名、merge / rebase）</li>
+          <li data-edit>开发环境配置、项目坑点</li>
+          <li data-edit>任何你希望 Claude「记住」的信息</li>
+        </ul>
+      </div>
+      <div class="split-panel accent-panel reveal" style="--delay: 0.38s;">
+        <div class="split-label teal">示例（没有强制格式）</div>
+        <div class="code-block" style="margin-top: 10px; font-size: var(--small-size);" data-edit><span class="cmt"># Bash commands</span>
+- npm run build: Build the project
+- npm run typecheck: Run the typechecker
+
+<span class="cmt"># Code style</span>
+- Use ES modules (import/export) syntax
+
+<span class="cmt"># Workflow</span>
+- Be sure to typecheck when you're done
+- Prefer running single tests, not the whole suite</div>
+      </div>
+    </div>
+
+    <p class="caption reveal" style="--delay: 0.52s; margin-top: var(--content-gap);" data-edit>
+      只要简洁、便于人类阅读即可——记得越具体，AI 的表现越稳定。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 12 · Claude Code 内部原理
+     ============================================================ -->
+<section class="slide" id="slide-12">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">HOW IT WORKS</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>为什么它更好用：感知—思考—行动—验证</h2>
+
+    <div class="vim-grid" style="margin-top: var(--content-gap);">
+      <div class="vim-card reveal" style="--delay: 0.26s;">
+        <div class="vim-key">Stream</div>
+        <div class="vim-action" data-edit>流式处理</div>
+        <div class="vim-desc" data-edit>一边思考一边输出，不等全部写完再执行</div>
+      </div>
+      <div class="vim-card reveal" style="--delay: 0.34s;">
+        <div class="vim-key">Compress</div>
+        <div class="vim-action" data-edit>智能压缩</div>
+        <div class="vim-desc" data-edit>把长对话历史压缩成关键信息，减少遗忘</div>
+      </div>
+      <div class="vim-card reveal" style="--delay: 0.42s;">
+        <div class="vim-key">Parallel</div>
+        <div class="vim-action" data-edit>并发控制</div>
+        <div class="vim-desc" data-edit>内部并行设计，多个任务同时推进互不干扰</div>
+      </div>
+      <div class="vim-card reveal" style="--delay: 0.50s;">
+        <div class="vim-key">Sub-Agent</div>
+        <div class="vim-action" data-edit>子 Agent 管理</div>
+        <div class="vim-desc" data-edit>多个子 Agent 分工协作：测试、文档各有所司</div>
+      </div>
+    </div>
+
+    <img class="img-frame reveal" style="--delay: 0.58s; margin-top: var(--content-gap); max-height: min(30vh, 250px);" loading="lazy"
+         src="https://datawhalechina.github.io/easy-vibe/assets/image25.VxRTSzut.png"
+         alt="Claude Code 主任务循环架构图"
+         onerror="this.style.display='none'" />
+
+    <p class="caption reveal" style="--delay: 0.66s; margin-top: var(--element-gap);" data-edit>
+      模仿人类开发者的工作流：不断「写代码 → 运行 → 看结果 → 再改进」，根据工具返回的真实结果决定下一步。其他 CLI 工具的实现大体类似。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 13 · Codex
+     ============================================================ -->
+<section class="slide" id="slide-13">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">CODEX</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>Codex：OpenAI 版的 Claude Code</h2>
+
+    <div class="two-col" style="margin-top: var(--content-gap);">
+      <div class="split-panel reveal" style="--delay: 0.28s;">
+        <div class="split-label">它是什么</div>
+        <div class="split-title" data-edit>最大优势：对 GPT-5 的高效适配</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>GPT-5 响应速度更快、犯错率更低</li>
+          <li data-edit>多轮复杂任务中正确完成的概率更高</li>
+          <li data-edit>缺点：解释偏学术、信息量大，对初学者略难懂</li>
+        </ul>
+        <div class="code-block" style="margin-top: 10px; font-size: var(--small-size);" data-edit><span class="cmt"># 安装 Codex</span>
+<span class="cmd">npm i -g @openai/codex</span></div>
+      </div>
+      <div class="split-panel accent-panel reveal" style="--delay: 0.38s;">
+        <div class="split-label teal">两种后端</div>
+        <div class="split-title" data-edit>官方 API 或转发 API</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>官方 API：输入 <span class="token">codex</span> 按提示完成登录即可</li>
+          <li data-edit>转发 API：第三方平台买配额，避开价格与网络限制</li>
+          <li data-edit>配置 <span class="token">config.toml</span> + 环境变量（可交给 Trae 完成）</li>
+          <li data-edit><span class="token">codex --profile myrelay</span> 启动转发模式</li>
+        </ul>
+        <p class="split-body" style="margin-top: 10px;" data-edit>注意：转发平台的密钥分组要选「Codex 专用」那一项。</p>
+      </div>
+    </div>
+
+    <p class="caption reveal" style="--delay: 0.52s; margin-top: var(--content-gap);" data-edit>
+      配好之后用法和 Claude Code 类似：在对话框里随时输入你的想法和需求即可。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 14 · OpenCode
+     ============================================================ -->
+<section class="slide" id="slide-14">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">OPENCODE</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>OpenCode：多模型版的 Claude Code</h2>
+
+    <div class="two-col" style="margin-top: var(--content-gap);">
+      <div class="split-panel reveal" style="--delay: 0.28s;">
+        <div class="split-label">它是什么</div>
+        <div class="split-title" data-edit>开源的 AI Coding Agent 平台</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>Terminal 为核心入口，也支持 VS Code / Neovim</li>
+          <li data-edit>自由切换 GPT / Claude / Gemini 乃至本地模型</li>
+          <li data-edit>OpenAI 官方也支持 OpenCode 接入 Codex 订阅</li>
+        </ul>
+        <div class="code-block" style="margin-top: 10px; font-size: var(--small-size);" data-edit><span class="cmt"># Linux / Unix</span>
+<span class="cmd">curl -fsSL https://opencode.ai/install | bash</span>
+
+<span class="cmt"># Windows</span>
+<span class="cmd">npm i -g opencode-ai</span></div>
+      </div>
+      <div class="split-panel accent-panel reveal" style="--delay: 0.38s;">
+        <div class="split-label teal">上手两步</div>
+        <div class="split-title" data-edit>免费模型 + 第三方模型</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>输入 <span class="token">opencode</span> 启动，进入聊天面板</li>
+          <li data-edit><span class="token">/models</span> 搜 free 关键词，用免费模型</li>
+          <li data-edit><span class="token">/connect</span> 浏览器授权，接入第三方模型</li>
+          <li data-edit>免费模型高峰期较慢，付费 / 订阅模型更稳</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="caption reveal" style="--delay: 0.52s; margin-top: var(--content-gap);" data-edit>
+      核心优势：同样的 MCP、Skills、上下文配置下，<strong style="color: var(--text)">自由切换模型</strong>完成不同编码任务。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 15 · Oh My OpenAgent 插件
+     ============================================================ -->
+<section class="slide" id="slide-15">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">OH MY OPENAGENT</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>OpenCode 之上的「多 Agent 指挥系统」</h2>
+
+    <div class="three-col" style="margin-top: var(--content-gap);">
+      <div class="col-card reveal" style="--delay: 0.25s;">
+        <div class="col-card-num">Sisyphus</div>
+        <div class="col-card-title" data-edit>主指挥官</div>
+        <div class="col-card-desc" data-edit>制定计划、分配任务给专家团队，以激进的并行策略推动任务直至完成，从不半途而废。</div>
+      </div>
+      <div class="col-card reveal" style="--delay: 0.33s;">
+        <div class="col-card-num">Hephaestus</div>
+        <div class="col-card-title" data-edit>深度工作者</div>
+        <div class="col-card-desc" data-edit>只给目标、不给做法。自动探索代码库模式，从头到尾独立执行任务，不要你当保姆。</div>
+      </div>
+      <div class="col-card reveal" style="--delay: 0.41s;">
+        <div class="col-card-num">Prometheus</div>
+        <div class="col-card-title" data-edit>战略规划师</div>
+        <div class="col-card-desc" data-edit>动手写代码前先访谈：通过提问确定范围，构建详尽的执行计划。</div>
+      </div>
+    </div>
+
+    <p class="caption reveal" style="--delay: 0.52s; margin-top: var(--content-gap);" data-edit>
+      亮点精选：<span class="token">ultrawork</span> 一键全员出动、IntentGate 意图门、后台智能体并行、内置 MCP、无缝兼容 Claude Code 生态。
+    </p>
+
+    <p class="caption dim reveal" style="--delay: 0.60s; margin-top: var(--element-gap);" data-edit>
+      安装方式：把官方安装指令话术直接粘贴给 OpenCode 里配好的模型，让它自己装。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 16 · OpenCode 进阶配置与技巧
+     ============================================================ -->
+<section class="slide" id="slide-16">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">TIPS &amp; TRICKS</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>OpenCode 进阶配置与日常技巧</h2>
+
+    <div class="check-grid" style="margin-top: var(--content-gap);">
+      <div class="check-card done reveal" style="--delay: 0.26s;">
+        <div class="check-icon"></div>
+        <div class="check-text" data-edit><span class="token">opencode.json</span> 精细控制模型：categories 按任务自动选模型——简单修改用快模型省钱，复杂架构用强模型保质</div>
+      </div>
+      <div class="check-card done reveal" style="--delay: 0.32s;">
+        <div class="check-icon"></div>
+        <div class="check-text" data-edit>MCP 扩展：chrome-devtools（操作浏览器、截图分析 UI）、zai-mcp-server，配完重启即可在对话中自动调用</div>
+      </div>
+      <div class="check-card done reveal" style="--delay: 0.38s;">
+        <div class="check-icon"></div>
+        <div class="check-text" data-edit><span class="token">AGENTS.md</span> 指导 AI 行为：项目约定、开发流程、禁止事项，每次启动自动读取</div>
+      </div>
+      <div class="check-card done reveal" style="--delay: 0.44s;">
+        <div class="check-icon"></div>
+        <div class="check-text" data-edit>常见问题：命令找不到 → 把 npm 全局目录加进 PATH 后重启终端；响应慢 → 走 quick 分类或开新会话</div>
+      </div>
+    </div>
+
+    <p class="caption reveal" style="--delay: 0.54s; margin-top: var(--content-gap);" data-edit>
+      不熟悉一个项目时，可以让它<strong style="color: var(--text)">并行探索</strong>：同时搜索 HTTP 请求、数据库代码、目录结构，一次给你完整的代码库地图。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 17 · 更多用法①：具体化需求
+     ============================================================ -->
+<section class="slide" id="slide-17">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">SPECIFY YOUR NEEDS</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>用 AI 写需求文档：学会「具体化」</h2>
+
+    <div class="two-col" style="margin-top: var(--content-gap);">
+      <div class="split-panel reveal" style="--delay: 0.28s;">
+        <div class="split-label">抽象需求</div>
+        <div class="split-title" data-edit>「我很饿」</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>「帮我写个每天记计划并提醒的应用」</li>
+          <li data-edit>AI 可以直接拆任务做，但中间易出错</li>
+          <li data-edit>理解偏差，返工成本高</li>
+        </ul>
+      </div>
+      <div class="split-panel accent-panel reveal" style="--delay: 0.38s;">
+        <div class="split-label teal">具体化之后</div>
+        <div class="split-title" data-edit>「一个红豆面包，再配一杯豆浆」</div>
+        <ul class="split-items" style="margin-top: 8px;">
+          <li data-edit>第一步：让 AI 把想法扩写成详细 PRD</li>
+          <li data-edit>第二步：让 AI 按 PRD 开发，结构更稳定</li>
+          <li data-edit>不确定的模块，让 AI 给备选方案再挑选合并</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="caption reveal" style="--delay: 0.52s; margin-top: var(--content-gap);" data-edit>
+      对 AI 开发来说，<strong style="color: var(--text)">「具体」就是生产力</strong>。长提示别每次重打——沉淀为 markdown 需求文档，迭代复用，文档越完善，代码实现越成熟。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 18 · 更多用法②：不止是写代码
+     ============================================================ -->
+<section class="slide" id="slide-18">
+  <div class="slide-content">
+
+    <div class="slide-label reveal" style="--delay: 0.05s;">BEYOND CODING</div>
+
+    <h2 class="reveal" style="--delay: 0.15s;" data-edit>不止是写代码</h2>
+
+    <div class="check-grid" style="margin-top: var(--content-gap);">
+      <div class="check-card done reveal" style="--delay: 0.26s;">
+        <div class="check-icon"></div>
+        <div class="check-text" data-edit>管理文件夹：一句话让 AI 把杂乱文件按内容、按时间归类整理</div>
+      </div>
+      <div class="check-card done reveal" style="--delay: 0.32s;">
+        <div class="check-icon"></div>
+        <div class="check-text" data-edit>开发新项目：和 z.ai / Trae 用法相同，提前准备需求文档，越细效果越好</div>
+      </div>
+      <div class="check-card done reveal" style="--delay: 0.38s;">
+        <div class="check-icon"></div>
+        <div class="check-text" data-edit>部署开源项目：把 GitHub 链接扔给 Claude Code，自动拉取、配环境、启动 Dify</div>
+      </div>
+      <div class="check-card done reveal" style="--delay: 0.44s;">
+        <div class="check-icon"></div>
+        <div class="check-text" data-edit>讲解代码与写文档：让 AI 读项目、出结构化分析文档，保存为 markdown</div>
+      </div>
+    </div>
+
+    <img class="img-frame reveal" style="--delay: 0.52s; margin-top: var(--content-gap); max-height: min(26vh, 220px);" loading="lazy"
+         src="https://datawhalechina.github.io/easy-vibe/assets/image31.CwBA0btN.png"
+         alt="Claude Code 自动拉取并启动 Dify"
+         onerror="this.style.display='none'" />
+
+    <p class="caption reveal" style="--delay: 0.60s; margin-top: var(--element-gap);" data-edit>
+      一个对话框 + 喝一杯咖啡的时间 ☕️——大部分常见 GitHub 开源项目都能这样跑起来。
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 19 · 结尾
+     ============================================================ -->
+<section class="slide quote-slide" id="slide-19">
+  <div class="slide-content" style="justify-content: center; align-items: flex-start;">
+
+    <img
+      class="brand-icon-closing reveal"
+      style="--delay: 0.05s;"
+      src="assets/logo/icon-light.svg"
+      alt="Easy Vibe"
+      onerror="this.style.display='none'"
+    />
+
+    <p class="quote-text reveal-blur" style="--delay: 0.22s; font-size: clamp(1.4rem, 4.2vw, 3.4rem);" data-edit>
+      别只把它当作写代码工具。<br>
+      也许在不久的将来，它会变成你电脑上<br>
+      <em>最重要、也最懂你的 AI 伙伴</em>。
+    </p>
+
+    <p class="caption reveal" style="--delay: 0.44s; margin-top: var(--content-gap);" data-edit>
+      行动建议：本章的工具都装一遍，各跑一次之前的旧项目，对比体验差异——反复「推倒重来」不是浪费时间，每重做一遍，技能都更扎实一分。
+    </p>
+
+    <p class="caption dim reveal" style="--delay: 0.54s; margin-top: var(--element-gap); font-family: var(--font-mono); letter-spacing: 0.06em;">
+      Easy Vibe 教程 · Stage 2 · 现代 CLI 编程工具 完
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+class SlidePresentation {
+  constructor() {
+    this.slides       = document.querySelectorAll('.slide');
+    this.currentSlide = 0;
+    this.progressBar  = document.getElementById('progressBar');
+    this.navDotsCont  = document.getElementById('navDots');
+    this.setupIntersectionObserver();
+    this.buildNavDots();
+    this.setupKeyboardNav();
+    this.setupWheelNav();
+    this.setupTouchNav();
+    this.setupScrollProgress();
+    this.slides[0].classList.add('visible');
+    this.syncProgress(0);
+  }
+  setupIntersectionObserver() {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          this.currentSlide = Array.from(this.slides).indexOf(entry.target);
+          this.syncProgress(this.currentSlide);
+          this.updateDots(this.currentSlide);
+        }
+      });
+    }, { threshold: 0.5 });
+    this.slides.forEach(s => obs.observe(s));
+  }
+  buildNavDots() {
+    this.navDotsCont.innerHTML = '';
+    this.slides.forEach((_, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      btn.setAttribute('aria-label', `幻灯片 ${i + 1}`);
+      btn.addEventListener('click', () => this.goTo(i));
+      this.navDotsCont.appendChild(btn);
+    });
+  }
+  updateDots(idx) {
+    document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  }
+  setupKeyboardNav() {
+    document.addEventListener('keydown', e => {
+      if (e.target.getAttribute('contenteditable')) return;
+      if (['ArrowDown', 'ArrowRight', 'PageDown'].includes(e.key) || e.key === ' ') {
+        e.preventDefault(); this.goTo(this.currentSlide + 1);
+      } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
+        e.preventDefault(); this.goTo(this.currentSlide - 1);
+      }
+    });
+  }
+  setupWheelNav() {
+    let last = 0;
+    document.addEventListener('wheel', e => {
+      const now = Date.now();
+      if (now - last < 700) return;
+      last = now;
+      if (e.deltaY > 0) this.goTo(this.currentSlide + 1);
+      else              this.goTo(this.currentSlide - 1);
+    }, { passive: true });
+  }
+  setupTouchNav() {
+    let startY = 0;
+    document.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+    document.addEventListener('touchend', e => {
+      const dy = startY - e.changedTouches[0].clientY;
+      if (Math.abs(dy) > 48) {
+        if (dy > 0) this.goTo(this.currentSlide + 1);
+        else        this.goTo(this.currentSlide - 1);
+      }
+    }, { passive: true });
+  }
+  setupScrollProgress() {
+    window.addEventListener('scroll', () => {
+      const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+      this.progressBar.style.width = pct + '%';
+    }, { passive: true });
+  }
+  syncProgress(idx) {
+    const pct = this.slides.length > 1 ? (idx / (this.slides.length - 1)) * 100 : 100;
+    this.progressBar.style.width = pct + '%';
+  }
+  goTo(idx) {
+    if (idx < 0 || idx >= this.slides.length) return;
+    this.slides[idx].scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+class InlineEditor {
+  constructor() {
+    this.isActive   = false;
+    this.storage    = this._load();
+    this.editToggle = document.getElementById('editToggle');
+    this.editBanner = document.getElementById('editBanner');
+    this.hotzone    = document.getElementById('editHotzone');
+    this._applyStored();
+    this._setupHotzone();
+    this._setupKeyboard();
+    this._setupSave();
+  }
+  _load() {
+    try { return JSON.parse(localStorage.getItem('ev-slides-cli-tools') || '{}'); }
+    catch { return {}; }
+  }
+  _applyStored() {
+    Object.entries(this.storage).forEach(([id, html]) => {
+      const el = document.querySelector(`[data-edit-id="${id}"]`);
+      if (el) el.innerHTML = html;
+    });
+  }
+  toggleEditMode() {
+    this.isActive = !this.isActive;
+    document.body.classList.toggle('edit-active', this.isActive);
+    this.editToggle.classList.toggle('active', this.isActive);
+    this.editBanner.classList.toggle('active', this.isActive);
+    const editables = document.querySelectorAll('[data-edit]');
+    editables.forEach((el, i) => {
+      el.setAttribute('data-edit-id', 'e' + i);
+      if (this.isActive) { el.setAttribute('contenteditable', 'true'); }
+      else { el.removeAttribute('contenteditable'); this.storage['e' + i] = el.innerHTML; }
+    });
+    if (!this.isActive) localStorage.setItem('ev-slides-cli-tools', JSON.stringify(this.storage));
+  }
+  _setupHotzone() {
+    let hideTimer = null;
+    const show = () => { clearTimeout(hideTimer); if (!this.isActive) this.editToggle.classList.add('show'); };
+    const hide = () => { hideTimer = setTimeout(() => { if (!this.isActive) this.editToggle.classList.remove('show'); }, 400); };
+    this.hotzone.addEventListener('mouseenter', show);
+    this.hotzone.addEventListener('mouseleave', hide);
+    this.hotzone.addEventListener('click', () => this.toggleEditMode());
+    this.editToggle.addEventListener('mouseenter', show);
+    this.editToggle.addEventListener('mouseleave', hide);
+    this.editToggle.addEventListener('click', () => this.toggleEditMode());
+  }
+  _setupKeyboard() {
+    document.addEventListener('keydown', e => {
+      if ((e.key === 'e' || e.key === 'E') && !e.target.getAttribute('contenteditable')) this.toggleEditMode();
+    });
+  }
+  _setupSave() {
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); this._exportFile(); }
+    });
+  }
+  _exportFile() {
+    const editEls = Array.from(document.querySelectorAll('[contenteditable]'));
+    editEls.forEach(el => el.removeAttribute('contenteditable'));
+    document.body.classList.remove('edit-active');
+    this.editToggle?.classList.remove('active', 'show');
+    this.editBanner?.classList.remove('active', 'show');
+    const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    document.body.classList.add('edit-active');
+    editEls.forEach(el => el.setAttribute('contenteditable', 'true'));
+    this.editToggle?.classList.add('active');
+    this.editBanner?.classList.add('active');
+    const blob = new Blob([html], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'slides-现代CLI编程工具.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+}
+
+class CardHighlighter {
+  constructor(presentation) {
+    this.presentation  = presentation;
+    this.CONTAINER_SEL = '.two-col, .three-col, .doubt-list, .cmd-grid, .vim-grid, .check-grid, .flow-row';
+    this.CARD_SEL      = '.split-panel, .col-card, .doubt-card, .cmd-row, .vim-card, .check-card, .flow-step';
+    this._setupClicks();
+    this._setupKeyboard();
+  }
+  _getCards(container) { return Array.from(container.querySelectorAll(this.CARD_SEL)); }
+  _currentContainer() {
+    const slide = document.querySelectorAll('.slide')[this.presentation.currentSlide];
+    return slide ? slide.querySelector(this.CONTAINER_SEL) : null;
+  }
+  highlight(container, index) {
+    const cards = this._getCards(container);
+    if (!cards[index]) return;
+    const already = cards[index].classList.contains('card-highlighted');
+    this.clear(container);
+    if (!already) { container.classList.add('has-selection'); cards[index].classList.add('card-highlighted'); }
+  }
+  clear(container) {
+    container.classList.remove('has-selection');
+    this._getCards(container).forEach(c => c.classList.remove('card-highlighted'));
+  }
+  _setupClicks() {
+    document.querySelectorAll(this.CONTAINER_SEL).forEach(container => {
+      this._getCards(container).forEach((card, i) => {
+        card.addEventListener('click', e => {
+          if (document.body.classList.contains('edit-active')) return;
+          e.stopPropagation();
+          this.highlight(container, i);
+        });
+      });
+      container.addEventListener('click', () => {
+        if (document.body.classList.contains('edit-active')) return;
+        this.clear(container);
+      });
+    });
+  }
+  _setupKeyboard() {
+    document.addEventListener('keydown', e => {
+      if (e.target.getAttribute('contenteditable')) return;
+      if (e.key === 'Escape') { const c = this._currentContainer(); if (c) this.clear(c); return; }
+      const num = parseInt(e.key);
+      if (isNaN(num) || num < 1 || num > 9) return;
+      const c = this._currentContainer();
+      if (!c) return;
+      const cards = this._getCards(c);
+      if (num > cards.length) return;
+      e.preventDefault();
+      this.highlight(c, num - 1);
+    });
+  }
+}
+
+/* === THEME TOGGLE（dark 为默认，localStorage 无记录时用 dark） === */
+class ThemeToggle {
+  constructor() {
+    this.KEY    = 'ev-cli-theme';
+    this.isDark = localStorage.getItem(this.KEY) !== 'light';
+    this._apply();
+    document.getElementById('themeToggle')
+      ?.addEventListener('click', () => this.toggle());
+  }
+  toggle() {
+    this.isDark = !this.isDark;
+    localStorage.setItem(this.KEY, this.isDark ? 'dark' : 'light');
+    this._apply();
+  }
+  _apply() {
+    document.documentElement.classList.toggle('dark', this.isDark);
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = this.isDark ? '☀' : '☾';
+    document.querySelectorAll('.brand-icon-closing').forEach(img => {
+      img.src = img.src.replace(
+        this.isDark ? 'icon-light.svg' : 'icon-dark.svg',
+        this.isDark ? 'icon-dark.svg'  : 'icon-light.svg'
+      );
+    });
+  }
+}
+
+const presentation = new SlidePresentation();
+const editor       = new InlineEditor();
+const highlighter  = new CardHighlighter(presentation);
+const themeToggle  = new ThemeToggle();
+</script>
+
+</body>
+</html>

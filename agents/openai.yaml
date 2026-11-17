@@ -1,0 +1,4 @@
+interface:
+  display_name: "Slide Maker"
+  short_description: "把任意内容做成零到全栈风格的自包含 HTML slides"
+  default_prompt: "用 $slide-maker 把这篇内容做成一套 slides"
